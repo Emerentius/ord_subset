@@ -1,3 +1,11 @@
+// Licensed under the Apache License, Version 2.0
+// http://www.apache.org/licenses/LICENSE-2.0 or the MIT license
+// http://opensource.org/licenses/MIT, at your
+// option. This file may not be copied, modified, or distributed
+// except according to those terms.
+
+// A wrapper for Option<T>, where None > Some(_).
+// No other function.
 use std::cmp::Ordering::{self, Greater, Less};
 
 #[derive(Debug, PartialEq, Eq)]
@@ -5,7 +13,6 @@ use std::cmp::Ordering::{self, Greater, Less};
 pub struct RevOption<T>(pub Option<T>);
 
 impl<T: PartialOrd> PartialOrd<RevOption<T>> for RevOption<T> {
-	//#[inline(always)]
 	fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
 		match (self.0.is_none(), other.0.is_none()) {
 			(true, false) => Some(Greater),
@@ -16,7 +23,6 @@ impl<T: PartialOrd> PartialOrd<RevOption<T>> for RevOption<T> {
 }
 
 impl<T: Ord> Ord for RevOption<T> {
-	//#[inline(always)]
 	fn cmp(&self, other: &Self) -> Ordering {
 		match (self.0.is_none(), other.0.is_none()) {
 			(true, false) => Greater,

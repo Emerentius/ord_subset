@@ -1,3 +1,9 @@
+// Licensed under the Apache License, Version 2.0
+// http://www.apache.org/licenses/LICENSE-2.0 or the MIT license
+// http://opensource.org/licenses/MIT, at your
+// option. This file may not be copied, modified, or distributed
+// except according to those terms.
+
 use almost_ord_trait::*;
 use std::cmp::Ordering::{self, Greater, Less};
 
@@ -10,7 +16,7 @@ pub trait AlmostOrdSliceExt<T: AlmostOrd> {
 	fn partial_sort(&mut self);
 
 
-	/// **UNSTABLE** Will likely remove these. Too specific and easily recreated by `.sort_by()`
+	/// **UNSTABLE** Will likely remove these. Easily recreated by `.sort_by()`
 	///
 	/// Sort the slice in reverse order, in place. Values outside the ordered subset are put at the end in no particular order.
 	///
@@ -22,9 +28,9 @@ pub trait AlmostOrdSliceExt<T: AlmostOrd> {
 	/// **Warning:** The function interface is equal to the `.sort_by()` interface. Be careful not to miss a `partial_` in front. It would work until you have unordered values in your slice, then crash unexpectedly.
 	///
 	/// Sorts the slice, in place, using compare to compare elements. Values outside the total order are put at the end. The comparator will not be called on them. If you wish to handle these yourself, use the regular `.sort_by()`.
-	/// The argument `compare` will only be used to compare elementns inside the total order.
+	/// The comparator function will only be used for elements inside the total order.
 	///
-	/// This sort is O(n log n) worst-case and stable, but allocates approximately 2 * n, where n is the length of self.
+	/// This sort is `O(n log n)` worst-case and stable, but allocates approximately `2 * n`, where `n` is the length of `self`.
 	///
 	/// # Panics
 	///
@@ -73,7 +79,7 @@ pub trait AlmostOrdSliceExt<T: AlmostOrd> {
 	fn partial_binary_search_by<F>(&self, f: F) -> Result<usize, usize>
 		where F: FnMut(&T) -> Ordering;
 
-	/// **UNSTABLE** Will likely remove these. Too specific and easily recreated by `.binary_search_by()`
+	/// **UNSTABLE** Will likely remove these. Easily recreated by `.binary_search_by()`
 	///
 	/// Binary search a slice sorted in reverse order for a given element. Values outside the ordered subset need to be at the end of the slice.
 	///

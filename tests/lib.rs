@@ -9,14 +9,14 @@ fn partial_max() {
 	let max = vec.iter().partial_max().unwrap();
 	assert_eq!(&5.0, max);
 }
-
+/*
 #[test]
 fn partial_max_by() {
 	let vec = vec![2.0, 3.0, 5.0, std::f64::NAN];
 	let max_by = vec.iter().partial_max_by(|num| num.recip()).unwrap();
 	assert_eq!(&2.0, max_by);
 }
-
+*/
 #[test]
 fn partial_min() {
 	let vec = vec![2.0, 3.0, 5.0, std::f64::NAN];
@@ -31,21 +31,14 @@ fn normal_min_by() {
 	assert_eq!(&0, min_by);
 }
 
-/* Needs negative trait bounds
-#[test]
-fn partial_min_by_on_ord() {
-	let vec = vec![2, 3, 5, 27, 0];
-	let min_by = vec.iter().partial_min_by(|&&num| num*num).unwrap();
-	assert_eq!(&0, min_by);
-}
-*/
+/*
 #[test]
 fn partial_min_by() {
 	let vec = vec![2.0, 3.0, 5.0, std::f64::NAN];
 	let min_by = vec.iter().partial_min_by(|num| num.recip()).unwrap();
 	assert_eq!(&5.0, min_by);
 }
-
+*/
 #[test]
 fn vec_sort() {
 	use std::f64;

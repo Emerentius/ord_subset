@@ -1,5 +1,3 @@
-#![feature(iter_cmp)]
-#![feature(iter_min_max)]
 //! Ever wanted to call `.max()` on an iterator of floats? Now you can! Well, almost: `.partial_max()`.
 //!
 //! This crate is for types like the float primitive types `f32` and `f64`: Types that are totally ordered *except for these particular values*.
@@ -12,7 +10,8 @@
 //!
 //! # Stability
 //!
-//! Internally, this crate uses the same methods that it extends to `AlmostOrd` types. Unstable traits in `std` are therefore also unstable here. It will stay at `0.x.y` until everything has stabilised. Breaking changes will increment the minor version.
+//! This crate confines itself to extending the stable functions in std, so that it can build on stable.
+//! Extensions for `min_by()`, `max_by()` and `min_max()` are therefore not yet included (If you need them, you can copy them out of the source code. They are merely commented out).
 //!
 //! # Usage
 //!
@@ -49,7 +48,8 @@
 //! except according to those terms.
 mod iter_ext;
 mod ord_var;
-mod rev_option;
+// for partial_min_by()
+//mod rev_option;
 mod slice_ext;
 mod almost_ord_trait;
 

@@ -6,8 +6,10 @@
 
 use almost_ord_trait::*;
 use ord_var::*;
-use rev_option::*;
-use std::iter::MinMaxResult;
+// for min_by
+//use rev_option::*;
+// min_max() feature currently not used
+//use std::iter::MinMaxResult;
 
 /////////////////////////////////////////////////////////////////////
 pub trait AlmostOrdIterExt<T>: Iterator
@@ -51,7 +53,7 @@ pub trait AlmostOrdIterExt<T>: Iterator
 	///	}
 	/// ```
 	fn partial_min(self) -> Option<<T as Iterator>::Item>;
-
+/*
 	/// **UNSTABLE** Follows the std library.
 	///
 	/// `min_max` finds the minimum and maximum elements in the iterator.
@@ -97,6 +99,7 @@ pub trait AlmostOrdIterExt<T>: Iterator
 	fn partial_max_by<F, B>(self, f: F) -> Option<<T as Iterator>::Item>
 		where F: FnMut(&<T as Iterator>::Item) -> B,
 			  B: AlmostOrd;
+*/
 }
 
 impl<T> AlmostOrdIterExt<T> for T
@@ -114,7 +117,7 @@ impl<T> AlmostOrdIterExt<T> for T
 			.min()
 			.map(|m| m.into_inner()) // Option<OrdVar<Item>> => Option<Item>
 	}
-
+/*
 	fn partial_min_max(self) -> MinMaxResult<Self::Item> {
 		use std::iter::MinMaxResult::*;
 		match self.filter_map(OrdVar::new_checked)
@@ -141,4 +144,5 @@ impl<T> AlmostOrdIterExt<T> for T
 		// Some > None, always
 		self.max_by(|it| OrdVar::new_checked(f(it)))
 	}
+*/
 }

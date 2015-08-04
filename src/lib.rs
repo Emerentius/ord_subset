@@ -1,6 +1,6 @@
 #![feature(iter_cmp)]
 #![feature(iter_min_max)]
-//! Ever wanted to call `.max()` on an iterator of floats? Now you can! Well, almost.`.partial_max()`.
+//! Ever wanted to call `.max()` on an iterator of floats? Now you can! Well, almost: `.partial_max()`.
 //!
 //! This crate is for types like the float primitive types `f32` and `f64`: Types that are totally ordered *except for these particular values*.
 //!

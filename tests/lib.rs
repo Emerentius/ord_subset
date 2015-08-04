@@ -107,6 +107,16 @@ fn array_rev_sort() {
 	assert_eq!(&s[..s.len()-2], &s2[..s2.len()-2]);
 }
 
+#[test]
+fn array_rev_sort_by() {
+	use std::f64;
+
+	let mut s  = [0., 1., f64::NAN, 1., 1., 1., 2., 3., 5., 8., 13., 21., 34., 55., f64::NAN];
+	let s2     = [55., 34., 21., 13., 8., 5., 3., 2., 1., 1., 1., 1., 0., f64::NAN, f64::NAN];
+	s.partial_sort_by(|a,b| b.partial_cmp(a).unwrap());
+	assert_eq!(&s[..s.len()-2], &s2[..s2.len()-2]);
+}
+
 // the equivalent reverse is in the docs for partial_binary_search()
 #[test]
 fn array_rev_binary_search_with_nan() {

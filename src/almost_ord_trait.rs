@@ -1,16 +1,20 @@
-/// This trait is for types that have a total ordering except for some elements which fall outside the line.
-/// ```is_outside_order()``` must return true for these outliers and false for anything else.
+/// Trait for types that form a total order when a few values are disallowed.
 ///
-/// The method ```partial_cmp(a,b)``` must return ```Some(_)``` if ```is_outside_order(a)``` == ```is_outside_order(b)``` == ```false``` and ```None``` else.
+/// `is_outside_order()` must return `true` for these outliers and `false` for anything else.
+///
+/// `std::cmp::PartialOrd::partial_cmp(a,b)` must return `Some(_)` if a,b are both inside order and `None` if only one is outside order. Return value for two variables outside order is undefined.
 pub trait AlmostOrd: PartialOrd<Self> + PartialEq<Self> {
 	fn is_outside_order(&self) -> bool;
 
+	/* would be nice sometimes, but providing this allows implementors to override it
+	// which is always a logic error
 	#[inline(always)]
-	fn is_on_order(&self) -> bool {
+	fn is_inside_order(&self) -> bool {
 		!self.is_outside_order()
 	}
+	*/
 }
-/* Needs negative trait bounds
+/* Needs negative trait bounds or mutually exclusive traits
 impl<T: Ord + !AlmostOrd> AlmostOrd for T {
 	fn is_outside_order(&self) -> bool {
 		false

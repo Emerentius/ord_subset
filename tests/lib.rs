@@ -58,7 +58,8 @@ fn vec_sort() {
 
 #[test]
 fn vec_binary_search() {
-	let mut vec = vec![5.0, 2.0, 3.0, 5.0, 5.0, 5.0, 7.0, 27.0, std::f64::NAN];
+	use std::f64;
+	let mut vec = vec![5.0, 2.0, 3.0, 5.0, 5.0, 5.0, 7.0, 27.0, f64::NAN];
 	//let mut vec = vec![5, 2, 3, 5];
 	//vec.sort();
 	vec.partial_sort();
@@ -68,4 +69,56 @@ fn vec_binary_search() {
 
 	let idx = vec.partial_binary_search(&5.0);
 	assert!((2..6).any(|n| Ok(n) == idx));
+}
+
+
+#[test]
+fn vec_rev_sort() {
+	use std::f64;
+	let mut vec = vec![5.0, 2.0, f64::INFINITY, 3.0, 5.0, 7.0, 27.0, f64::NAN, f64::NEG_INFINITY];
+	vec.partial_sort_rev();
+	assert_eq!(&vec[0..vec.len()-1], &[f64::INFINITY, 27.0, 7.0, 5.0, 5.0, 3.0, 2.0, f64::NEG_INFINITY]);
+}
+
+#[test]
+fn vec_rev_binary_search() {
+	use std::f64;
+	let mut vec = vec![5.0, 2.0, f64::INFINITY, 3.0, 5.0, 7.0, 27.0, f64::NAN, f64::NEG_INFINITY];
+	vec.partial_sort_rev();
+	assert_eq!(&vec[0..vec.len()-1], &[f64::INFINITY, 27.0, 7.0, 5.0, 5.0, 3.0, 2.0, f64::NEG_INFINITY]);
+	assert_eq!(vec.partial_binary_search_rev(&f64::NEG_INFINITY), Ok(7));
+	assert_eq!(vec.partial_binary_search_rev(&2.0), Ok(6));
+	assert_eq!(vec.partial_binary_search_rev(&3.0), Ok(5));
+	let idx = vec.partial_binary_search_rev(&5.0); // duplicate
+	assert!((3..5).any(|n| Ok(n) == idx));
+	assert_eq!(vec.partial_binary_search_rev(&7.0), Ok(2));
+	assert_eq!(vec.partial_binary_search_rev(&27.0), Ok(1));
+	assert_eq!(vec.partial_binary_search_rev(&f64::INFINITY), Ok(0));
+}
+
+
+#[test]
+fn array_rev_sort() {
+	use std::f64;
+
+	let mut s  = [0., 1., f64::NAN, 1., 1., 1., 2., 3., 5., 8., 13., 21., 34., 55., f64::NAN];
+	let s2     = [55., 34., 21., 13., 8., 5., 3., 2., 1., 1., 1., 1., 0., f64::NAN, f64::NAN];
+	s.partial_sort_rev();
+	assert_eq!(&s[..s.len()-2], &s2[..s2.len()-2]);
+}
+
+// the equivalent reverse is in the docs for partial_binary_search()
+#[test]
+fn array_rev_binary_search_with_nan() {
+	use std::f64;
+
+	let s = [55., 34., 21., 13., 8., 5., 3., 2., 1., 1., 1., 1., 0., f64::NAN, f64::NAN];
+
+	assert_eq!(s.partial_binary_search_rev(&13.),  Ok(3));
+	assert_eq!(s.partial_binary_search_rev(&4.),   Err(6));
+	assert_eq!(s.partial_binary_search_rev(&100.), Err(0));
+	let r = s.partial_binary_search_rev(&1.);
+	assert!(match r { Ok(8...11) => true, _ => false, });
+	assert_eq!(s.partial_binary_search_rev(&f64::INFINITY), Err(0));
+	assert_eq!(s.partial_binary_search_rev(&f64::NEG_INFINITY), Err(13));
 }

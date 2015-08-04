@@ -1,4 +1,12 @@
 [package]
 name = "almost_ord"
 version = "0.1.0"
-authors = ["Emerentius <Emerentius@arcor.de>"]
+authors = ["Emerentius"]
+
+license = "MIT/Apache-2.0"
+repository = "https://github.com/emerentius/almost_ord"
+documentation = "https://emerentius.github.io/almost_ord/"
+
+description = "Tools for working with the Ord subset of certain PartialOrd types, like floats."
+
+keywords = ["iterator", "slice", "Ord", "PartialOrd", "float"]

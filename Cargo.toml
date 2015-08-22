@@ -4,9 +4,9 @@ version = "0.2.0"
 authors = ["Emerentius"]
 
 license = "MIT/Apache-2.0"
-repository = "https://github.com/emerentius/almost_ord"
+repository = "https://github.com/emerentius/ord_subset"
 documentation = "https://emerentius.github.io/almost_ord/"
 
-description = "Tools for working with the Ord subset of certain PartialOrd types, like floats."
+description = "THIS CRATE WAS RENAMED TO ord_subset. Tools for working with the Ord subset of certain PartialOrd types, like floats. The crate under this name will no longer be updated. If you wish to take the name for yourself, please contact me on GitHub."
 
 keywords = ["iterator", "slice", "Ord", "PartialOrd", "float"]

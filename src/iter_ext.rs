@@ -12,8 +12,8 @@ use ord_var::*;
 //use std::iter::MinMaxResult;
 
 /////////////////////////////////////////////////////////////////////
-pub trait AlmostOrdIterExt<T>: Iterator
-	where <T as Iterator>::Item: AlmostOrd
+pub trait AlmostOrdIterExt: Iterator
+	where Self::Item: AlmostOrd
 {
 	/// Consumes the entire iterator to return the maximum element.
 	/// Values outside the ordered subset as given by `.is_outside_order()` are ignored.
@@ -32,7 +32,7 @@ pub trait AlmostOrdIterExt<T>: Iterator
 	/// 	assert_eq!(&5.0, max);
 	///	}
 	/// ```
-	fn partial_max(self) -> Option<<T as Iterator>::Item>;
+	fn partial_max(self) -> Option<Self::Item>;
 
 
 	/// Consumes the entire iterator to return the minimum element.
@@ -52,7 +52,7 @@ pub trait AlmostOrdIterExt<T>: Iterator
 	/// 	assert_eq!(&2.0, min);
 	///	}
 	/// ```
-	fn partial_min(self) -> Option<<T as Iterator>::Item>;
+	fn partial_min(self) -> Option<Self::Item>;
 /*
 	/// **UNSTABLE** Follows the std library.
 	///
@@ -65,7 +65,7 @@ pub trait AlmostOrdIterExt<T>: Iterator
     /// * `MinMax(x, y)` is returned otherwise, where `x <= y`. Two values are equal if and only if there is more than one element in the iterator and all elements are equal.
 	///
 	/// On an iterator of length `n`, `min_max` does `1.5 * n` comparisons, and so is faster than calling `min` and `max` separately which does `2 * n` comparisons.
-	fn partial_min_max(self) -> MinMaxResult<<T as Iterator>::Item>;
+	fn partial_min_max(self) -> MinMaxResult<Self::Item>;
 
 	/// **UNSTABLE** Follows the std library.
 	///
@@ -86,8 +86,8 @@ pub trait AlmostOrdIterExt<T>: Iterator
 	/// 	assert_eq!(&5.0, min_by);
 	/// }
 	/// ```
-	fn partial_min_by<F, B>(self, f: F) -> Option<<T as Iterator>::Item>
-		where F: FnMut(&<T as Iterator>::Item) -> B,
+	fn partial_min_by<F, B>(self, f: F) -> Option<Self::Item>
+		where F: FnMut(&Self::Item) -> B,
 			  B: AlmostOrd;
 
 	/// **UNSTABLE** Follows the std library.
@@ -96,15 +96,14 @@ pub trait AlmostOrdIterExt<T>: Iterator
 	/// Values outside the ordered subset as given by `.is_outside_order()` on the mapped value are ignored.
 	///
 	/// Returns the rightmost element if the comparison determines two elements to be equally maximum.
-	fn partial_max_by<F, B>(self, f: F) -> Option<<T as Iterator>::Item>
-		where F: FnMut(&<T as Iterator>::Item) -> B,
+	fn partial_max_by<F, B>(self, f: F) -> Option<Self::Item>
+		where F: FnMut(&Self::Item) -> B,
 			  B: AlmostOrd;
 */
 }
 
-impl<T> AlmostOrdIterExt<T> for T
-	where T: Iterator,
-	      <T as Iterator>::Item: AlmostOrd
+impl<T: Iterator> AlmostOrdIterExt for T
+	where T::Item: AlmostOrd
 {
 	fn partial_max(self) -> Option<Self::Item> {
 		self.filter_map(OrdVar::new_checked)
@@ -130,7 +129,7 @@ impl<T> AlmostOrdIterExt<T> for T
 	}
 
 	fn partial_min_by<F, B>(self, mut f: F) -> Option<Self::Item>
-		where F: FnMut(&<T as Iterator>::Item) -> B,
+		where F: FnMut(&Self::Item) -> B,
 			  B: AlmostOrd
 	{
 		// None < Some, always

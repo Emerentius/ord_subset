@@ -2,13 +2,15 @@
 
 Crate for working with the `Ord` subset of certain types like `f32`, `f64`.
 
+
+
 Documentation is up at https://emerentius.github.io/almost_ord.
 
 # Usage
 Add this to your `Cargo.toml`:
 ```toml
 [dependencies]
-almost_ord = "~0.1.0"
+almost_ord = "~0.2.0"
 ```
 
 ```rust

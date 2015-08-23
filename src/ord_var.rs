@@ -6,11 +6,11 @@
 
 use std::cmp::Ordering;
 use std::fmt::Debug;
-use almost_ord_trait::*;
+use ord_subset_trait::*;
 use std::ops::Deref;
 
 /// Wrapper to signal that the contained variables have a total order. It's illegal to compare two `OrdVar`s that are not ordered.
-/// For this reason, it's unsafe to create `OrdVar`s without checking. Checked constructors are available for `AlmostOrd` types.
+/// For this reason, it's unsafe to create `OrdVar`s without checking. Checked constructors are available for `OrdSubset` types.
 ///
 /// # Panics
 ///
@@ -26,7 +26,7 @@ impl<T: PartialOrd + PartialEq> OrdVar<T> {
 	///
 	/// Panics if the argument is outside of the total order.
 	pub fn new(data: T)	-> OrdVar<T>
-		where T: Debug + AlmostOrd
+		where T: Debug + OrdSubset
 	{
 		if data.is_outside_order() { panic!("Attempted saving data outside of total order into OrdVar: {:?}", data) };
 		OrdVar(data)
@@ -34,7 +34,7 @@ impl<T: PartialOrd + PartialEq> OrdVar<T> {
 
 	/// Constructs an ```Option<OrdVar>``` out of the argument. Returns None if the argument is outside the total order.
 	pub fn new_checked(data: T)	-> Option<OrdVar<T>>
-		where T: AlmostOrd,
+		where T: OrdSubset,
 	{
 		match data.is_outside_order() {
 			true  => None,
@@ -43,7 +43,7 @@ impl<T: PartialOrd + PartialEq> OrdVar<T> {
 	}
 
 	/// Constructs an `OrdVar` without validity check. Incorrectly constructed `OrdVar`s may panic during comparisons.
-	/// This is the only way to construct an `OrdVar` out of a type that is not `AlmostOrd`.
+	/// This is the only way to construct an `OrdVar` out of a type that is not `OrdSubset`.
 	pub unsafe fn new_unchecked(data: T) -> OrdVar<T> {
 		OrdVar(data)
 	}

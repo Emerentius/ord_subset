@@ -4,7 +4,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use almost_ord_trait::*;
+use ord_subset_trait::*;
 use ord_var::*;
 // for min_by
 //use rev_option::*;
@@ -12,8 +12,8 @@ use ord_var::*;
 //use std::iter::MinMaxResult;
 
 /////////////////////////////////////////////////////////////////////
-pub trait AlmostOrdIterExt: Iterator
-	where Self::Item: AlmostOrd
+pub trait OrdSubsetIterExt: Iterator
+	where Self::Item: OrdSubset
 {
 	/// Consumes the entire iterator to return the maximum element.
 	/// Values outside the ordered subset as given by `.is_outside_order()` are ignored.
@@ -23,16 +23,16 @@ pub trait AlmostOrdIterExt: Iterator
 	/// # Example
 	///
 	/// ```
-	/// extern crate almost_ord;
-	/// use almost_ord::AlmostOrdIterExt;
+	/// extern crate ord_subset;
+	/// use ord_subset::OrdSubsetIterExt;
 	///
 	/// fn main() {
 	/// 	let vec = vec![2.0, 3.0, 5.0, std::f64::NAN];
-	/// 	let max = vec.iter().partial_max().unwrap();
+	/// 	let max = vec.iter().ord_subset_max().unwrap();
 	/// 	assert_eq!(&5.0, max);
 	///	}
 	/// ```
-	fn partial_max(self) -> Option<Self::Item>;
+	fn ord_subset_max(self) -> Option<Self::Item>;
 
 
 	/// Consumes the entire iterator to return the minimum element.
@@ -43,16 +43,16 @@ pub trait AlmostOrdIterExt: Iterator
 	/// # Example
 	///
 	/// ```
-	/// extern crate almost_ord;
-	/// use almost_ord::AlmostOrdIterExt;
+	/// extern crate ord_subset;
+	/// use ord_subset::OrdSubsetIterExt;
 	///
 	/// fn main() {
 	/// 	let vec = vec![2.0, 3.0, 5.0, std::f64::NAN];
-	/// 	let min = vec.iter().partial_min().unwrap();
+	/// 	let min = vec.iter().ord_subset_min().unwrap();
 	/// 	assert_eq!(&2.0, min);
 	///	}
 	/// ```
-	fn partial_min(self) -> Option<Self::Item>;
+	fn ord_subset_min(self) -> Option<Self::Item>;
 /*
 	/// **UNSTABLE** Follows the std library.
 	///
@@ -65,7 +65,7 @@ pub trait AlmostOrdIterExt: Iterator
     /// * `MinMax(x, y)` is returned otherwise, where `x <= y`. Two values are equal if and only if there is more than one element in the iterator and all elements are equal.
 	///
 	/// On an iterator of length `n`, `min_max` does `1.5 * n` comparisons, and so is faster than calling `min` and `max` separately which does `2 * n` comparisons.
-	fn partial_min_max(self) -> MinMaxResult<Self::Item>;
+	fn ord_subset_min_max(self) -> MinMaxResult<Self::Item>;
 
 	/// **UNSTABLE** Follows the std library.
 	///
@@ -77,18 +77,18 @@ pub trait AlmostOrdIterExt: Iterator
 	/// # Example
 	///
 	/// ```
-	/// extern crate almost_ord;
-	/// use almost_ord::AlmostOrdIterExt;
+	/// extern crate ord_subset;
+	/// use ord_subset::OrdSubsetIterExt;
 	///
 	/// fn main() {
 	/// 	let vec = vec![2.0, 3.0, 5.0, std::f64::NAN];
-	/// 	let min_by = vec.iter().partial_min_by(|num| num.recip()).unwrap();
+	/// 	let min_by = vec.iter().ord_subset_min_by(|num| num.recip()).unwrap();
 	/// 	assert_eq!(&5.0, min_by);
 	/// }
 	/// ```
-	fn partial_min_by<F, B>(self, f: F) -> Option<Self::Item>
+	fn ord_subset_min_by<F, B>(self, f: F) -> Option<Self::Item>
 		where F: FnMut(&Self::Item) -> B,
-			  B: AlmostOrd;
+			  B: OrdSubset;
 
 	/// **UNSTABLE** Follows the std library.
 	///
@@ -96,28 +96,28 @@ pub trait AlmostOrdIterExt: Iterator
 	/// Values outside the ordered subset as given by `.is_outside_order()` on the mapped value are ignored.
 	///
 	/// Returns the rightmost element if the comparison determines two elements to be equally maximum.
-	fn partial_max_by<F, B>(self, f: F) -> Option<Self::Item>
+	fn ord_subset_max_by<F, B>(self, f: F) -> Option<Self::Item>
 		where F: FnMut(&Self::Item) -> B,
-			  B: AlmostOrd;
+			  B: OrdSubset;
 */
 }
 
-impl<T: Iterator> AlmostOrdIterExt for T
-	where T::Item: AlmostOrd
+impl<T: Iterator> OrdSubsetIterExt for T
+	where T::Item: OrdSubset
 {
-	fn partial_max(self) -> Option<Self::Item> {
+	fn ord_subset_max(self) -> Option<Self::Item> {
 		self.filter_map(OrdVar::new_checked)
 			.max()
 			.map(|m| m.into_inner()) // Option<OrdVar<Item>> => Option<Item>
 	}
 
-	fn partial_min(self) -> Option<Self::Item> {
+	fn ord_subset_min(self) -> Option<Self::Item> {
 		self.filter_map(OrdVar::new_checked)
 			.min()
 			.map(|m| m.into_inner()) // Option<OrdVar<Item>> => Option<Item>
 	}
 /*
-	fn partial_min_max(self) -> MinMaxResult<Self::Item> {
+	fn ord_subset_min_max(self) -> MinMaxResult<Self::Item> {
 		use std::iter::MinMaxResult::*;
 		match self.filter_map(OrdVar::new_checked)
 			.min_max()
@@ -128,17 +128,17 @@ impl<T: Iterator> AlmostOrdIterExt for T
 		}
 	}
 
-	fn partial_min_by<F, B>(self, mut f: F) -> Option<Self::Item>
+	fn ord_subset_min_by<F, B>(self, mut f: F) -> Option<Self::Item>
 		where F: FnMut(&Self::Item) -> B,
-			  B: AlmostOrd
+			  B: OrdSubset
 	{
 		// None < Some, always
 		self.min_by(|it| RevOption(OrdVar::new_checked(f(it))))
 	}
 
-	fn partial_max_by<F, B>(self, mut f: F) -> Option<Self::Item>
+	fn ord_subset_max_by<F, B>(self, mut f: F) -> Option<Self::Item>
 		where F: FnMut(&Self::Item) -> B,
-		      B: AlmostOrd,
+		      B: OrdSubset,
 	{
 		// Some > None, always
 		self.max_by(|it| OrdVar::new_checked(f(it)))

@@ -10,6 +10,8 @@ use std::cmp::Ordering::{self, Greater, Less};
 pub trait OrdSubsetSliceExt<T: OrdSubset> {
 	/// Sort the slice, in place. Values outside the ordered subset are put at the end in no particular order.
 	///
+	/// This is equivalent to `self.ord_subset_sort_by(|a,b| a.partial_cmp(b).unwrap())`
+	///
 	/// # Panics
 	///
 	/// Panics when `a.partial_cmp(b)` returns `None` for two values `a`,`b` inside the total order (Violated OrdSubset contract).
@@ -25,12 +27,12 @@ pub trait OrdSubsetSliceExt<T: OrdSubset> {
 	/// Panics when `a.partial_cmp(b)` returns `None` for two values `a`,`b` inside the total order (Violated OrdSubset contract).
 	fn ord_subset_sort_rev(&mut self);
 
-	/// **Warning:** The function interface is equal to the `.sort_by()` interface. Be careful not to miss a `ord_subset_` in front. It would work until you have unordered values in your slice, then crash unexpectedly.
-	///
 	/// Sorts the slice, in place, using compare to compare elements. Values outside the total order are put at the end. The comparator will not be called on them. If you wish to handle these yourself, use the regular `.sort_by()`.
 	/// The comparator function will only be used for elements inside the total order.
 	///
-	/// This sort is `O(n log n)` worst-case and stable, but allocates approximately `2 * n`, where `n` is the length of `self`.
+	/// **Warning:** The function interface is identical to the `.sort_by()` interface. Be careful not to miss `ord_subset_` in front. It would work until you have unordered values in your slice, then crash unexpectedly.
+	///
+	/// This uses the sort in the std library. It is therefore `O(n log n)` worst-case and stable, but allocates approximately `2 * n`, where `n` is the length of `self`.
 	///
 	/// # Panics
 	///
@@ -45,23 +47,20 @@ pub trait OrdSubsetSliceExt<T: OrdSubset> {
 	///
 	/// # Example
 	///
-	/// Looks up a series of five elements. The first is found, with a uniquely determined position; the second and third are not found; the fourth could match any position in ``[1,4].
+	/// Looks up a series of five elements. The first is found, with a uniquely determined position; the second and third are not found; the fourth could match any position in `[1,4]`.
 	///
 	/// ```
-	/// extern crate ord_subset;
 	/// use ord_subset::OrdSubsetSliceExt;
 	/// use std::f64;
 	///
-	/// fn main() {
-	/// 	let s = [0., 1., 1., 1., 1., 2., 3., 5., 8., 13., 21., 34., 55., f64::NAN, f64::NAN];
+	/// let s = [0., 1., 1., 1., 1., 2., 3., 5., 8., 13., 21., 34., 55., f64::NAN, f64::NAN];
 	///
-	/// 	assert_eq!(s.ord_subset_binary_search(&13.),  Ok(9));
-	/// 	assert_eq!(s.ord_subset_binary_search(&4.),   Err(7));
-	/// 	assert_eq!(s.ord_subset_binary_search(&100.), Err(13));
-	/// 	let r = s.ord_subset_binary_search(&1.);
-	/// 	assert!(match r { Ok(1...4) => true, _ => false, });
-	///		assert_eq!(s.ord_subset_binary_search(&f64::INFINITY), Err(13));
-	/// }
+	/// assert_eq!(s.ord_subset_binary_search(&13.),  Ok(9));
+	/// assert_eq!(s.ord_subset_binary_search(&4.),   Err(7));
+	/// assert_eq!(s.ord_subset_binary_search(&100.), Err(13));
+	/// let r = s.ord_subset_binary_search(&1.);
+	/// assert!(match r { Ok(1...4) => true, _ => false, });
+	///	assert_eq!(s.ord_subset_binary_search(&f64::INFINITY), Err(13));
 	/// ```
 	///
 	/// # Panics
@@ -73,7 +72,7 @@ pub trait OrdSubsetSliceExt<T: OrdSubset> {
 	///
 	/// The comparator function should implement an order consistent with the sort order of the underlying slice, returning an order code that indicates whether its argument is Less, Equal or Greater the desired target. The comparator will only be called for values inside the total order.
 	///
-	/// **It's imperative, that the comparator function doesn't compare with values outside the total order. This will lead to logic errors which cannot be caught by this function.** You can use `OrdSubset::is_outside_order(elem)` inside the comparator to distinguish.
+	/// It's imperative, that the comparator function doesn't compare its arguments with values outside the total order. This will result in bogus output which cannot be caught by this function.
 	///
 	/// If a matching value is found then returns Ok, containing the index for the matched element; if no match is found then Err is returned, containing the index where a matching element could be inserted while maintaining sorted order.
 	fn ord_subset_binary_search_by<F>(&self, f: F) -> Result<usize, usize>
@@ -83,7 +82,7 @@ pub trait OrdSubsetSliceExt<T: OrdSubset> {
 	///
 	/// Binary search a slice sorted in reverse order for a given element. Values outside the ordered subset need to be at the end of the slice.
 	///
-	/// If the value is found then Ok is returned, containing the index of the matching element; if the value is not found then Err is returned, containing the index where a matching element could be inserted while maintaining sorted order.
+	/// If a matching value is found then returns Ok, containing the index for the matched element; if no match is found then Err is returned, containing the index where a matching element could be inserted while maintaining sorted order.
 	///
 	/// # Panics
 	///

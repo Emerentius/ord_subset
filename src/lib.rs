@@ -24,20 +24,17 @@
 //!
 //!
 //! ```
-//! extern crate ord_subset;
 //! use ord_subset::{OrdSubsetIterExt, OrdSubsetSliceExt};
 //!
-//! fn main() {
-//! 	// Slices. Works on vector, too.
-//! 	let mut s = [5.0, std::f64::NAN, 3.0, 2.0];
-//! 	s.ord_subset_sort();
-//! 	assert_eq!(&s[0..3], &[2.0, 3.0, 5.0]);
-//! 	assert_eq!(s.ord_subset_binary_search(&5.0), Ok(2));
+//! // Slices. Works on vector, too.
+//! let mut s = [5.0, std::f64::NAN, 3.0, 2.0];
+//! s.ord_subset_sort();
+//! assert_eq!(&s[0..3], &[2.0, 3.0, 5.0]);
+//! assert_eq!(s.ord_subset_binary_search(&5.0), Ok(2));
 //!
-//! 	// iterators
-//! 	assert_eq!( s.iter().ord_subset_max(), Some(&5.0) );
-//! 	assert_eq!( s.iter().ord_subset_min(), Some(&2.0) );
-//! }
+//! // iterators
+//! assert_eq!( s.iter().ord_subset_max(), Some(&5.0) );
+//! assert_eq!( s.iter().ord_subset_min(), Some(&2.0) );
 //! ```
 //!
 //! # License

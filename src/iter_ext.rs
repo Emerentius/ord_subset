@@ -23,14 +23,11 @@ pub trait OrdSubsetIterExt: Iterator
 	/// # Example
 	///
 	/// ```
-	/// extern crate ord_subset;
 	/// use ord_subset::OrdSubsetIterExt;
 	///
-	/// fn main() {
-	/// 	let vec = vec![2.0, 3.0, 5.0, std::f64::NAN];
-	/// 	let max = vec.iter().ord_subset_max().unwrap();
-	/// 	assert_eq!(&5.0, max);
-	///	}
+	/// let vec = vec![2.0, 3.0, 5.0, std::f64::NAN];
+	/// let max = vec.iter().ord_subset_max().unwrap();
+	/// assert_eq!(&5.0, max);
 	/// ```
 	fn ord_subset_max(self) -> Option<Self::Item>;
 
@@ -43,14 +40,11 @@ pub trait OrdSubsetIterExt: Iterator
 	/// # Example
 	///
 	/// ```
-	/// extern crate ord_subset;
 	/// use ord_subset::OrdSubsetIterExt;
 	///
-	/// fn main() {
-	/// 	let vec = vec![2.0, 3.0, 5.0, std::f64::NAN];
-	/// 	let min = vec.iter().ord_subset_min().unwrap();
-	/// 	assert_eq!(&2.0, min);
-	///	}
+	/// let vec = vec![2.0, 3.0, 5.0, std::f64::NAN];
+	/// let min = vec.iter().ord_subset_min().unwrap();
+	/// assert_eq!(&2.0, min);
 	/// ```
 	fn ord_subset_min(self) -> Option<Self::Item>;
 /*

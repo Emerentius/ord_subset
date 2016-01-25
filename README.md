@@ -1,4 +1,4 @@
-# ord_subset
+# ord_subset [![Build Status](https://travis-ci.org/Emerentius/ord_subset.svg?branch=master)](https://travis-ci.org/Emerentius/ord_subset)
 
 Crate for working with the `Ord` subset of certain types like `f32`, `f64`.
 

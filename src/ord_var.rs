@@ -15,7 +15,7 @@ use std::ops::Deref;
 /// # Panics
 ///
 /// Panics when `a.partial_cmp(b)` returns `None` for two values `a`,`b`.
-#[derive(PartialEq, PartialOrd, Clone, Copy, Debug)]
+#[derive(PartialEq, PartialOrd, Clone, Copy, Debug, Hash)]
 pub struct OrdVar<T: PartialOrd + PartialEq>(T);
 
 impl<T: PartialOrd + PartialEq> OrdVar<T> {

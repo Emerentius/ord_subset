@@ -1,4 +1,3 @@
-#![feature(iter_cmp)]
 extern crate ord_subset;
 use ord_subset::OrdSubsetIterExt;
 use ord_subset::OrdSubsetSliceExt;
@@ -24,12 +23,12 @@ fn ord_subset_min() {
 	assert_eq!(&2.0, min);
 }
 
-#[test]
-fn normal_min_by() {
-	let vec = vec![2, 3, 5, 27, 0];
-	let min_by = vec.iter().min_by(|&&num| num*num).unwrap();
-	assert_eq!(&0, min_by);
-}
+//#[test]
+//fn normal_min_by() {
+//	let vec = vec![2, 3, 5, 27, 0];
+//	let min_by = vec.iter().min_by(|&&num| num*num).unwrap();
+//	assert_eq!(&0, min_by);
+//}
 
 /*
 #[test]

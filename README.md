@@ -10,7 +10,7 @@ Documentation is up at https://emerentius.github.io/ord_subset.
 Add this to your `Cargo.toml`:
 ```toml
 [dependencies]
-ord_subset = "~1.0.0"
+ord_subset = "1.2.0"
 ```
 
 ```rust

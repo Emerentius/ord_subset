@@ -46,7 +46,7 @@
 mod iter_ext;
 mod ord_var;
 // for ord_subset_min_by()
-//mod rev_option;
+mod rev_option;
 mod slice_ext;
 mod ord_subset_trait;
 

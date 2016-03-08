@@ -8,14 +8,14 @@ fn ord_subset_max() {
 	let max = vec.iter().ord_subset_max().unwrap();
 	assert_eq!(&5.0, max);
 }
-/*
+
 #[test]
 fn ord_subset_max_by() {
 	let vec = vec![2.0, 3.0, 5.0, std::f64::NAN];
-	let max_by = vec.iter().ord_subset_max_by(|num| num.recip()).unwrap();
+	let max_by = vec.iter().ord_subset_max_by_key(|num| num.recip()).unwrap();
 	assert_eq!(&2.0, max_by);
 }
-*/
+
 #[test]
 fn ord_subset_min() {
 	let vec = vec![2.0, 3.0, 5.0, std::f64::NAN];
@@ -23,21 +23,13 @@ fn ord_subset_min() {
 	assert_eq!(&2.0, min);
 }
 
-//#[test]
-//fn normal_min_by() {
-//	let vec = vec![2, 3, 5, 27, 0];
-//	let min_by = vec.iter().min_by(|&&num| num*num).unwrap();
-//	assert_eq!(&0, min_by);
-//}
-
-/*
 #[test]
 fn ord_subset_min_by() {
 	let vec = vec![2.0, 3.0, 5.0, std::f64::NAN];
-	let min_by = vec.iter().ord_subset_min_by(|num| num.recip()).unwrap();
+	let min_by = vec.iter().ord_subset_min_by_key(|num| num.recip()).unwrap();
 	assert_eq!(&5.0, min_by);
 }
-*/
+
 #[test]
 fn vec_sort() {
 	use std::f64;

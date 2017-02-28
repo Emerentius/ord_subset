@@ -8,18 +8,13 @@
 //! For convenience, iterators and slices are extended so that OrdSubset types have access to methods equivalent to `.max()` and `.sort()`.
 //! Values in the unordered subset of a type that is OrdSubset are handled in a consistent manner (Ignored or put at the end).
 //!
-//! # Stability
-//!
-//! This crate confines itself to extending the stable functions in std, so that it can build on stable.
-//! Extensions for `min_by()`, `max_by()` and `min_max()` are therefore not yet included (If you need them, you can copy them out of the source code. They are merely commented out).
-//!
 //! # Usage
 //!
 //! Add this to your `Cargo.toml`:
 //!
 //! ```toml
 //! [dependencies]
-//! ord_subset = "~1.0.0"
+//! ord_subset = "1"
 //! ```
 //!
 //!

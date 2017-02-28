@@ -36,7 +36,7 @@ fn ord_subset_min_by() {
 // The referenced functions must accept iters of values, that are not OrdSubset
 // if the closure produces OrdSubset values
 #[test]
-fn ord_subset_iter_ext_min_or_max_by_key() {
+fn ord_subset_min_or_max_by_key() {
 	let array: [NotOrdSubset; 0] = [];
 	array.iter().ord_subset_min_by_key(|_| 0.0);
 	array.iter().ord_subset_max_by_key(|_| 0.0);
@@ -54,6 +54,14 @@ fn vec_sort() {
 }
 
 #[test]
+fn vec_rev_sort() {
+	use std::f64;
+	let mut vec = vec![5.0, 2.0, f64::INFINITY, 3.0, 5.0, 7.0, 27.0, f64::NAN, f64::NEG_INFINITY];
+	vec.ord_subset_sort_rev();
+	assert_eq!(&vec[0..vec.len()-1], &[f64::INFINITY, 27.0, 7.0, 5.0, 5.0, 3.0, 2.0, f64::NEG_INFINITY]);
+}
+
+#[test]
 fn vec_binary_search() {
 	use std::f64;
 	let mut vec = vec![5.0, 2.0, 3.0, 5.0, 5.0, 5.0, 7.0, 27.0, f64::NAN];
@@ -66,15 +74,6 @@ fn vec_binary_search() {
 
 	let idx = vec.ord_subset_binary_search(&5.0);
 	assert!((2..6).any(|n| Ok(n) == idx));
-}
-
-
-#[test]
-fn vec_rev_sort() {
-	use std::f64;
-	let mut vec = vec![5.0, 2.0, f64::INFINITY, 3.0, 5.0, 7.0, 27.0, f64::NAN, f64::NEG_INFINITY];
-	vec.ord_subset_sort_rev();
-	assert_eq!(&vec[0..vec.len()-1], &[f64::INFINITY, 27.0, 7.0, 5.0, 5.0, 3.0, 2.0, f64::NEG_INFINITY]);
 }
 
 #[test]
@@ -141,7 +140,6 @@ fn sort_by_key() {
 	assert_eq!(&s[..], &s_correctly_sorted[..]);
 }
 
-// FIXME: Add tests for correct position if element is not found
 #[test]
 fn binary_search_by_key_success() {
 	fn key_function(el: &f64) -> f64 {
@@ -157,7 +155,26 @@ fn binary_search_by_key_success() {
 	}
 }
 
-// FIXME: activate test when ord_subset_binary_search_by_key has been implemented
+#[test]
+fn binary_search_by_key_failure() {
+	fn key_function(el: &f64) -> f64 {
+		el.recip()
+	}
+
+	let mut s = (-5i32..6).map(|num| num as f64).collect::<Vec<_>>();
+	s.ord_subset_sort_by_key(key_function);
+
+	let mut keys = s.iter().map(key_function).collect::<Vec<_>>();
+
+	// -1 because two elements are looked at
+	// -1 to leave trailing 0 out
+	for i in 0..keys.len() - 2 {
+		let avg = (keys[i] + keys[i+1]) / 2.0;
+		let pos = s.ord_subset_binary_search_by_key(&avg, key_function);
+		assert_eq!(pos, Err(i+1));
+	}
+}
+
 // std-library bug: https://github.com/rust-lang/rust/issues/34683
 // caused valid code not to compile due to elided lifetime parameters being too strict
 // this test is a compile test, it can't fail at runtime

@@ -5,7 +5,7 @@ authors = ["Emerentius"]
 
 license = "MIT/Apache-2.0"
 repository = "https://github.com/emerentius/ord_subset"
-documentation = "https://emerentius.github.io/ord_subset/"
+documentation = "https://docs.rs/ord_subset/"
 
 description = "Tools for working with the Ord subset of certain PartialOrd types, like floats."
 

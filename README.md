@@ -4,13 +4,13 @@ Crate for working with the `Ord` subset of certain types like `f32`, `f64`.
 
 
 
-Documentation is up at https://emerentius.github.io/ord_subset.
+Documentation is up at https://docs.rs/ord_subset/.
 
 # Usage
 Add this to your `Cargo.toml`:
 ```toml
 [dependencies]
-ord_subset = "1.2.0"
+ord_subset = "1"
 ```
 
 ```rust

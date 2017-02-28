@@ -57,6 +57,18 @@ pub trait OrdSubsetSliceExt<T> {
 		where T: OrdSubset,
 		      F: FnMut(&T, &T) -> Ordering;
 
+	/* FIXME:  CORRECT DOCUMENTATION
+
+			  add this (can't be delegated to std lib)
+	          Have to filter inputs before passing to key extraction function
+	*/
+	/// Sorts the slice, in place, using `key` to extract a key by which to order the sort by.
+	///
+	/// This sort is stable and `O(n log n)` worst-case but allocates approximately `2 * n`, where `n` is the length of `self`.
+	fn ord_subset_sort_by_key<B, F>(&mut self, f: F)
+		where B: OrdSubset,
+		      F: FnMut(&T) -> B;
+
 	/// Binary search a sorted slice for a given element. Values outside the ordered subset need to be at the end of the slice.
 	///
 	/// If the value is found then Ok is returned, containing the index of the matching element; if the value is not found then Err is returned, containing the index where a matching element could be inserted while maintaining sorted order.
@@ -95,6 +107,15 @@ pub trait OrdSubsetSliceExt<T> {
 		where T: OrdSubset,
 		      F: FnMut(&T) -> Ordering;
 
+	/// Binary search a sorted slice with a key extraction function.
+	///
+	/// Assumes that the slice is sorted by the key, for instance with `ord_subset_sort_by_key` using the same key extraction function.
+	///
+	/// If a matching value is found then returns `Ok`, containing the index for the matched element; if no match is found then `Err` is returned, containing the index where a matching element could be inserted while maintaining sorted order.
+	fn ord_subset_binary_search_by_key<B, F>(&self, b: &B, f: F) -> Result<usize, usize>
+		where B: OrdSubset,
+		      F: FnMut(&T) -> B;
+
 	/// **UNSTABLE** Will likely remove these. Easily recreated by `.binary_search_by()`
 	///
 	/// Binary search a slice sorted in reverse order for a given element. Values outside the ordered subset need to be at the end of the slice.
@@ -129,6 +150,17 @@ impl<T> OrdSubsetSliceExt<T> for [T]
 		self.ord_subset_sort_by(|a,b| b.partial_cmp(a).expect("Violated OrdSubset contract: a.partial_cmp(b) == None for a,b inside total order"))
 	}
 
+	fn ord_subset_sort_by_key<B, F>(&mut self, mut f: F)
+		where B: OrdSubset,
+		      F: FnMut(&T) -> B
+	{
+		let cmp_ord = |a: &B, b: &B| a.partial_cmp(b).expect("Internal ord_subset error. Reached supposedly unreachable code path in ord_subset_binary_search_by_key");
+
+		self.sort_by(|a, b| compare_unordered_greater_everything(&(f(a)), &(f(b)), &cmp_ord))
+
+		//.ord_subset_sort_by_key()
+	}
+
 	fn ord_subset_binary_search(&self, x: &T) -> Result<usize, usize>
 		where T: OrdSubset,
 	{
@@ -148,6 +180,17 @@ impl<T> OrdSubsetSliceExt<T> for [T]
 				false => f(other),
 			}
 		})
+	}
+
+	fn ord_subset_binary_search_by_key<B, F>(&self, b: &B, mut f: F) -> Result<usize, usize>
+		where B: OrdSubset,
+		      F: FnMut(&T) -> B
+	{
+		if b.is_outside_order() { panic!("Attempted binary search for value outside total order") };
+		// compare ordered values as expected
+		// wrap it in a function that deals with unordered, so this one never sees them
+		let cmp_ord = |a: &B, b: &B| a.partial_cmp(b).expect("Internal ord_subset error. Reached supposedly unreachable code path in ord_subset_binary_search_by_key");
+		self.binary_search_by(|k| compare_unordered_greater_everything(&f(k), b, &cmp_ord))
 	}
 
 	fn ord_subset_binary_search_rev(&self, x: &T) -> Result<usize, usize>
@@ -182,6 +225,13 @@ impl<T, U> OrdSubsetSliceExt<T> for U
 		self.as_mut().ord_subset_sort_rev();
 	}
 
+	fn ord_subset_sort_by_key<B, F>(&mut self, f: F)
+		where B: OrdSubset,
+		      F: FnMut(&T) -> B
+	{
+		self.as_mut().ord_subset_sort_by_key(f)
+	}
+
 	fn ord_subset_binary_search(&self, x: &T) -> Result<usize, usize>
 		where T: OrdSubset,
 	{
@@ -194,6 +244,13 @@ impl<T, U> OrdSubsetSliceExt<T> for U
 		      F: FnMut(&T) -> Ordering
 	{
 		self.as_ref().ord_subset_binary_search_by(f)
+	}
+
+	fn ord_subset_binary_search_by_key<B, F>(&self, b: &B, f: F) -> Result<usize, usize>
+		where B: OrdSubset,
+		      F: FnMut(&T) -> B
+	{
+		self.as_ref().ord_subset_binary_search_by_key(b, f)
 	}
 
 	fn ord_subset_binary_search_rev(&self, x: &T) -> Result<usize, usize>

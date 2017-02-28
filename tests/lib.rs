@@ -129,3 +129,51 @@ fn array_rev_binary_search_with_nan() {
 	assert_eq!(s.ord_subset_binary_search_rev(&f64::INFINITY), Err(0));
 	assert_eq!(s.ord_subset_binary_search_rev(&f64::NEG_INFINITY), Err(13));
 }
+
+#[test]
+fn sort_by_key() {
+	fn key_function(el: &f64) -> f64 {
+		el.recip()
+	}
+	let mut s = (-5i32..6).map(|num| num as f64).collect::<Vec<_>>();
+	let s_correctly_sorted = [-1.0f64, -2.0, -3.0, -4.0, -5.0, 5.0, 4.0, 3.0, 2.0, 1.0, 0.0];
+	s.ord_subset_sort_by_key(key_function);
+	assert_eq!(&s[..], &s_correctly_sorted[..]);
+}
+
+// FIXME: Add tests for correct position if element is not found
+#[test]
+fn binary_search_by_key_success() {
+	fn key_function(el: &f64) -> f64 {
+		el.recip()
+	}
+
+	let mut s = (-5i32..6).map(|num| num as f64).collect::<Vec<_>>();
+	s.ord_subset_sort_by_key(key_function);
+
+	for (i, num) in s.iter().take_while(|num| !num.is_nan()).enumerate() {
+		let pos = s.ord_subset_binary_search_by_key(&key_function(num), key_function);
+		assert_eq!(pos, Ok(i));
+	}
+}
+
+// FIXME: activate test when ord_subset_binary_search_by_key has been implemented
+// std-library bug: https://github.com/rust-lang/rust/issues/34683
+// caused valid code not to compile due to elided lifetime parameters being too strict
+// this test is a compile test, it can't fail at runtime
+#[test]
+fn binary_search_lifetime() {
+	#[derive(Debug)]
+	struct Foo {
+    	property: f32,
+	}
+
+    let xs = vec![
+        Foo { property: 1. },
+        Foo { property: 2. },
+        Foo { property: 3. },
+    ];
+
+    let _r = xs.ord_subset_binary_search_by_key(&2., |entry| entry.property);
+    //println!("{:?}", r.map(|i| (i, &xs[i])));
+}

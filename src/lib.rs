@@ -14,7 +14,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! ord_subset = "1"
+//! ord_subset = "2"
 //! ```
 //!
 //!

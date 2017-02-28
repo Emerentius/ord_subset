@@ -10,7 +10,7 @@ Documentation is up at https://docs.rs/ord_subset/.
 Add this to your `Cargo.toml`:
 ```toml
 [dependencies]
-ord_subset = "1"
+ord_subset = "2"
 ```
 
 ```rust

@@ -2,6 +2,8 @@ extern crate ord_subset;
 use ord_subset::OrdSubsetIterExt;
 use ord_subset::OrdSubsetSliceExt;
 
+struct NotOrdSubset();
+
 #[test]
 fn ord_subset_max() {
 	let vec = vec![2.0, 3.0, 5.0, std::f64::NAN];
@@ -29,6 +31,17 @@ fn ord_subset_min_by() {
 	let min_by = vec.iter().ord_subset_min_by_key(|num| num.recip()).unwrap();
 	assert_eq!(&5.0, min_by);
 }
+
+// This is a compile time test. It can't fail at runtime.
+// The referenced functions must accept iters of values, that are not OrdSubset
+// if the closure produces OrdSubset values
+#[test]
+fn ord_subset_iter_ext_min_or_max_by_key() {
+	let array: [NotOrdSubset; 0] = [];
+	array.iter().ord_subset_min_by_key(|_| 0.0);
+	array.iter().ord_subset_max_by_key(|_| 0.0);
+}
+
 
 #[test]
 fn vec_sort() {

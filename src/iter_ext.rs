@@ -11,7 +11,7 @@ use rev_option::*;
 
 /////////////////////////////////////////////////////////////////////
 pub trait OrdSubsetIterExt: Iterator
-	where Self::Item: OrdSubset
+	//where Self::Item: OrdSubset
 {
 	/// Consumes the entire iterator to return the maximum element.
 	/// Values outside the ordered subset as given by `.is_outside_order()` are ignored.
@@ -28,7 +28,8 @@ pub trait OrdSubsetIterExt: Iterator
 	/// assert_eq!(&5.0, max);
 	/// ```
 	fn ord_subset_max(self) -> Option<Self::Item>
-		where Self: Sized
+		where Self: Sized,
+		      Self::Item: OrdSubset
 	{
 		self.filter_map(OrdVar::new_checked)
 			.max()
@@ -50,7 +51,8 @@ pub trait OrdSubsetIterExt: Iterator
 	/// assert_eq!(&2.0, min);
 	/// ```
 	fn ord_subset_min(self) -> Option<Self::Item>
-		where Self: Sized
+		where Self: Sized,
+		      Self::Item: OrdSubset
 	{
 		self.filter_map(OrdVar::new_checked)
 			.min()
@@ -97,4 +99,4 @@ pub trait OrdSubsetIterExt: Iterator
 	}
 }
 
-impl<T: ?Sized + Iterator> OrdSubsetIterExt for T where T::Item: OrdSubset {}
+impl<T: ?Sized + Iterator> OrdSubsetIterExt for T {}

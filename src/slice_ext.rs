@@ -7,7 +7,23 @@
 use ord_subset_trait::*;
 use std::cmp::Ordering::{self, Greater, Less};
 
-pub trait OrdSubsetSliceExt<T: OrdSubset> {
+// Wrapper for comparison functions
+// Treats unordered values as greater than any ordered
+fn compare_unordered_greater_everything<T: OrdSubset, F>(a: &T, b: &T, mut compare: F) -> Ordering
+	where F: FnMut(&T, &T) -> Ordering,
+{
+	match (a.is_outside_order(), b.is_outside_order()) {
+			// catch invalids and put them at the end
+			// (true, true) Ordering is irrelevant (except for performance possibly)
+			// however, handling that would tightly bind this to the sort algorithm
+			// that is delegated to
+			(true, false) | (true, true) => Greater,
+			(false, true) => Less,
+			(false, false) => compare(a,b), // the normal case, both valid. Here user function applies.
+	}
+}
+
+pub trait OrdSubsetSliceExt<T> {
 	/// Sort the slice, in place. Values outside the ordered subset are put at the end in no particular order.
 	///
 	/// This is equivalent to `self.ord_subset_sort_by(|a,b| a.partial_cmp(b).unwrap())`
@@ -15,8 +31,7 @@ pub trait OrdSubsetSliceExt<T: OrdSubset> {
 	/// # Panics
 	///
 	/// Panics when `a.partial_cmp(b)` returns `None` for two values `a`,`b` inside the total order (Violated OrdSubset contract).
-	fn ord_subset_sort(&mut self);
-
+	fn ord_subset_sort(&mut self) where T: OrdSubset;
 
 	/// **UNSTABLE** Will likely remove these. Easily recreated by `.sort_by()`
 	///
@@ -25,21 +40,22 @@ pub trait OrdSubsetSliceExt<T: OrdSubset> {
 	/// # Panics
 	///
 	/// Panics when `a.partial_cmp(b)` returns `None` for two values `a`,`b` inside the total order (Violated OrdSubset contract).
-	fn ord_subset_sort_rev(&mut self);
+	fn ord_subset_sort_rev(&mut self) where T: OrdSubset;
 
 	/// Sorts the slice, in place, using compare to compare elements. Values outside the total order are put at the end. The comparator will not be called on them. If you wish to handle these yourself, use the regular `.sort_by()`.
 	/// The comparator function will only be used for elements inside the total order.
 	///
 	/// **Warning:** The function interface is identical to the `.sort_by()` interface. Be careful not to miss `ord_subset_` in front. It would work until you have unordered values in your slice, then crash unexpectedly.
 	///
-	/// This uses the sort in the std library. It is therefore `O(n log n)` worst-case and stable, but allocates approximately `2 * n`, where `n` is the length of `self`.
+	/// This uses the sort in the std library. It is therefore `O(n log n)` worst-case, but allocates approximately `2 * n`, where `n` is the length of `self`.
+	/// It is stable for values inside total order but may shuffle values outside of it. May become very inefficient if many unordered values exist.
 	///
 	/// # Panics
 	///
-	/// This method doesn't panic on its own. However, if `OrdSubset` was implemented incorrectly, `unwrap`ping the result of `a.partial_cmp(b)` inside `compare` could panic.
-	/// Apart from that possibility, unwrapping is safe in that situation.
+	/// Panics when `a.partial_cmp(b)` returns `None` for two values `a`,`b` inside the total order (Violated OrdSubset contract).
 	fn ord_subset_sort_by<F>(&mut self, compare: F)
-		where F: FnMut(&T, &T) -> Ordering;
+		where T: OrdSubset,
+		      F: FnMut(&T, &T) -> Ordering;
 
 	/// Binary search a sorted slice for a given element. Values outside the ordered subset need to be at the end of the slice.
 	///
@@ -66,7 +82,7 @@ pub trait OrdSubsetSliceExt<T: OrdSubset> {
 	/// # Panics
 	///
 	/// Panics if the argument is outside of the total order. Also panics when `a.partial_cmp(b)` returns `None` for two values `a`,`b` inside the total order (Violated OrdSubset contract).
-	fn ord_subset_binary_search(&self, x: &T) -> Result<usize, usize>;
+	fn ord_subset_binary_search(&self, x: &T) -> Result<usize, usize> where T: OrdSubset;
 
 	/// Binary search a sorted slice with a comparator function.
 	///
@@ -76,7 +92,8 @@ pub trait OrdSubsetSliceExt<T: OrdSubset> {
 	///
 	/// If a matching value is found then returns Ok, containing the index for the matched element; if no match is found then Err is returned, containing the index where a matching element could be inserted while maintaining sorted order.
 	fn ord_subset_binary_search_by<F>(&self, f: F) -> Result<usize, usize>
-		where F: FnMut(&T) -> Ordering;
+		where T: OrdSubset,
+		      F: FnMut(&T) -> Ordering;
 
 	/// **UNSTABLE** Will likely remove these. Easily recreated by `.binary_search_by()`
 	///
@@ -87,34 +104,34 @@ pub trait OrdSubsetSliceExt<T: OrdSubset> {
 	/// # Panics
 	///
 	/// Panics if the argument is outside of the total order. Also panics when `a.partial_cmp(b)` returns `None` for two values `a`,`b` inside the total order (Violated OrdSubset contract).
-	fn ord_subset_binary_search_rev(&self, x: &T) -> Result<usize, usize>;
+	fn ord_subset_binary_search_rev(&self, x: &T) -> Result<usize, usize> where T: OrdSubset;
 }
 
 impl<T> OrdSubsetSliceExt<T> for [T]
-	where T: OrdSubset
 {
-	fn ord_subset_sort(&mut self) {
+	fn ord_subset_sort(&mut self)
+		where T: OrdSubset,
+	{
 		self.ord_subset_sort_by(|a,b| a.partial_cmp(b).expect("Violated OrdSubset contract: a.partial_cmp(b) == None for a,b inside total order"))
 	}
 
 	fn ord_subset_sort_by<F>(&mut self, mut compare: F)
-		where F: FnMut(&T, &T) -> Ordering
+		where T: OrdSubset,
+		      F: FnMut(&T, &T) -> Ordering
 	{
-		self.sort_by(|a,b| {
-			match (a.is_outside_order(), b.is_outside_order()) {
-				// catch invalids and put them at the end
-				(true, false) | (true, true) => Greater, // (true, true) Ordering is irrelevant
-				(false, true) => Less,
-				(false, false) => compare(a,b), // the normal case, both valid. Here user function applies.
-			}
-		})
+		self.sort_by(|a, b|
+			compare_unordered_greater_everything(a, b, &mut compare)
+		)
 	}
-
-	fn ord_subset_sort_rev(&mut self) {
+	fn ord_subset_sort_rev(&mut self)
+		where T: OrdSubset,
+	{
 		self.ord_subset_sort_by(|a,b| b.partial_cmp(a).expect("Violated OrdSubset contract: a.partial_cmp(b) == None for a,b inside total order"))
 	}
 
-	fn ord_subset_binary_search(&self, x: &T) -> Result<usize, usize> {
+	fn ord_subset_binary_search(&self, x: &T) -> Result<usize, usize>
+		where T: OrdSubset,
+	{
 		if x.is_outside_order() { panic!("Attempted binary search for value outside total order") };
 		self.ord_subset_binary_search_by(|other| {
 			other.partial_cmp(x).expect("Violated OrdSubset contract: a.partial_cmp(b) == None for a,b inside total order")
@@ -122,7 +139,8 @@ impl<T> OrdSubsetSliceExt<T> for [T]
 	}
 
 	fn ord_subset_binary_search_by<F>(&self, mut f: F) -> Result<usize, usize>
-		where F: FnMut(&T) -> Ordering
+		where T: OrdSubset,
+		      F: FnMut(&T) -> Ordering
 	{
 		self.binary_search_by( |other| {
 			match other.is_outside_order() {
@@ -132,7 +150,9 @@ impl<T> OrdSubsetSliceExt<T> for [T]
 		})
 	}
 
-	fn ord_subset_binary_search_rev(&self, x: &T) -> Result<usize, usize> {
+	fn ord_subset_binary_search_rev(&self, x: &T) -> Result<usize, usize>
+		where T: OrdSubset,
+	{
 		if x.is_outside_order() { panic!("Attempted binary search for value outside total order") };
 		self.ord_subset_binary_search_by(|other| {
 			x.partial_cmp(other).expect("Violated OrdSubset contract: a.partial_cmp(b) == None for a,b inside total order")
@@ -141,34 +161,45 @@ impl<T> OrdSubsetSliceExt<T> for [T]
 }
 
 impl<T, U> OrdSubsetSliceExt<T> for U
-	where T: OrdSubset,
-		  U: AsMut<[T]> + AsRef<[T]>,
+	where U: AsRef<[T]> + AsMut<[T]>,
+	      [T]: OrdSubsetSliceExt<T>,
 {
-	fn ord_subset_sort(&mut self) {
-		self.as_mut().ord_subset_sort();
-	}
-
-	fn ord_subset_sort_by<F>(&mut self, compare: F)
-		where F: FnMut(&T, &T) -> Ordering
+	fn ord_subset_sort(&mut self)
+		where T: OrdSubset,
 	{
-		self.as_mut().ord_subset_sort_by(compare);
+		self.as_mut().ord_subset_sort()
+	}
+	fn ord_subset_sort_by<F>(&mut self, compare: F)
+		where T: OrdSubset,
+		      F: FnMut(&T, &T) -> Ordering,
+	{
+		self.as_mut().ord_subset_sort_by(compare)
 	}
 
-	fn ord_subset_sort_rev(&mut self) {
+	fn ord_subset_sort_rev(&mut self)
+		where T: OrdSubset,
+	{
 		self.as_mut().ord_subset_sort_rev();
 	}
 
-	fn ord_subset_binary_search(&self, x: &T) -> Result<usize, usize> {
+	fn ord_subset_binary_search(&self, x: &T) -> Result<usize, usize>
+		where T: OrdSubset,
+	{
 		self.as_ref().ord_subset_binary_search(x)
 	}
 
 	fn ord_subset_binary_search_by<F>(&self, f: F) -> Result<usize, usize>
-		where F: FnMut(&T) -> Ordering
+		where //U: AsRef<[T]>,
+		      T: OrdSubset,
+		      F: FnMut(&T) -> Ordering
 	{
 		self.as_ref().ord_subset_binary_search_by(f)
 	}
 
-	fn ord_subset_binary_search_rev(&self, x: &T) -> Result<usize, usize> {
+	fn ord_subset_binary_search_rev(&self, x: &T) -> Result<usize, usize>
+		where // U: AsRef<[T]>,
+		      T: OrdSubset,
+	{
 		self.as_ref().ord_subset_binary_search_rev(x)
 	}
 }

@@ -18,3 +18,7 @@ Version 2.1.0 (2017-09-23)
 * `OrdVar::new_unchecked()` is no longer marked unsafe. Incorrectly constructed `OrdVar`s can cause crashes and surprising behaviour
 but no memory unsafety
 * In slice sorting, uphold sort stability for values outside total order.
+
+Unreleased
+==========
+* `sort_unstable*` variants

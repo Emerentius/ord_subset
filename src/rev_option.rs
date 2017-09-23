@@ -6,7 +6,7 @@
 
 // A wrapper for Option<T>, where None > Some(_).
 // No other function.
-use std::cmp::Ordering::{self, Greater, Less};
+use core::cmp::Ordering::{self, Greater, Less};
 
 #[derive(Debug, PartialEq, Eq)]
 // None > Some, always

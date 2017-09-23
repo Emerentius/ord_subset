@@ -1,3 +1,6 @@
+// FIXME: Add tests for unstable sorts
+// 		  Make test suite compatible with --no-default-features
+
 extern crate ord_subset;
 use ord_subset::OrdSubsetIterExt;
 use ord_subset::OrdSubsetSliceExt;
@@ -44,6 +47,7 @@ fn ord_subset_min_or_max_by_key() {
 
 
 #[test]
+#[cfg(feature="std")]
 fn vec_sort() {
 	use std::f64;
 	let mut vec = vec![5.0, 2.0, f64::INFINITY, 3.0, 5.0, 7.0, 27.0, f64::NAN, f64::NEG_INFINITY];
@@ -54,6 +58,7 @@ fn vec_sort() {
 }
 
 #[test]
+#[cfg(feature="std")]
 fn vec_rev_sort() {
 	use std::f64;
 	let mut vec = vec![5.0, 2.0, f64::INFINITY, 3.0, 5.0, 7.0, 27.0, f64::NAN, f64::NEG_INFINITY];
@@ -67,7 +72,7 @@ fn vec_binary_search() {
 	let mut vec = vec![5.0, 2.0, 3.0, 5.0, 5.0, 5.0, 7.0, 27.0, f64::NAN];
 	//let mut vec = vec![5, 2, 3, 5];
 	//vec.sort();
-	vec.ord_subset_sort();
+	vec.ord_subset_sort_unstable();
 	//assert_eq!(&vec[0..4], &[2.0, 3.0, 5.0, 5.0]);
 	assert_eq!(vec.ord_subset_binary_search(&2.0), Ok(0));
 	assert_eq!(vec.ord_subset_binary_search(&3.0), Ok(1));
@@ -80,7 +85,7 @@ fn vec_binary_search() {
 fn vec_rev_binary_search() {
 	use std::f64;
 	let mut vec = vec![5.0, 2.0, f64::INFINITY, 3.0, 5.0, 7.0, 27.0, f64::NAN, f64::NEG_INFINITY];
-	vec.ord_subset_sort_rev();
+	vec.ord_subset_sort_unstable_rev();
 	assert_eq!(&vec[0..vec.len()-1], &[f64::INFINITY, 27.0, 7.0, 5.0, 5.0, 3.0, 2.0, f64::NEG_INFINITY]);
 	assert_eq!(vec.ord_subset_binary_search_rev(&f64::NEG_INFINITY), Ok(7));
 	assert_eq!(vec.ord_subset_binary_search_rev(&2.0), Ok(6));
@@ -94,6 +99,7 @@ fn vec_rev_binary_search() {
 
 
 #[test]
+#[cfg(feature="std")]
 fn array_rev_sort() {
 	use std::f64;
 
@@ -104,6 +110,7 @@ fn array_rev_sort() {
 }
 
 #[test]
+#[cfg(feature="std")]
 fn array_rev_sort_by() {
 	use std::f64;
 
@@ -130,6 +137,7 @@ fn array_rev_binary_search_with_nan() {
 }
 
 #[test]
+#[cfg(feature="std")]
 fn sort_by_key() {
 	fn key_function(el: &f64) -> f64 {
 		el.recip()
@@ -147,7 +155,7 @@ fn binary_search_by_key_success() {
 	}
 
 	let mut s = (-5i32..6).map(|num| num as f64).collect::<Vec<_>>();
-	s.ord_subset_sort_by_key(key_function);
+	s.ord_subset_sort_unstable_by_key(key_function);
 
 	for (i, num) in s.iter().take_while(|num| !num.is_nan()).enumerate() {
 		let pos = s.ord_subset_binary_search_by_key(&key_function(num), key_function);
@@ -162,7 +170,7 @@ fn binary_search_by_key_failure() {
 	}
 
 	let mut s = (-5i32..6).map(|num| num as f64).collect::<Vec<_>>();
-	s.ord_subset_sort_by_key(key_function);
+	s.ord_subset_sort_unstable_by_key(key_function);
 
 	let keys = s.iter().map(key_function).collect::<Vec<_>>();
 

@@ -4,10 +4,10 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use std::cmp::Ordering;
-use std::fmt::Debug;
+use core::cmp::Ordering;
+use core::fmt::Debug;
 use ord_subset_trait::*;
-use std::ops::Deref;
+use core::ops::Deref;
 
 /// Wrapper to signal that the contained variables have a total order. It's illegal to compare two `OrdVar`s that are not ordered.
 /// For this reason, it's unsafe to create `OrdVar`s without checking. Checked constructors are available for `OrdSubset` types.

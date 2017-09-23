@@ -10,3 +10,14 @@ documentation = "https://docs.rs/ord_subset/"
 description = "Tools for working with the Ord subset of certain PartialOrd types, like floats."
 
 keywords = ["iterator", "slice", "Ord", "PartialOrd", "float"]
+
+[features]
+default = ["std"]
+
+# Provides ord_subset_* versions of allocating sorts on slices
+std = []
+
+# Provides access to features dependent on unstable functionality
+# Currently this is the Float trait in core which defines .is_nan()
+# Necessary for default OrdSubset implementations for f32, f64
+unstable = []

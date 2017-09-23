@@ -23,7 +23,7 @@
 //!
 //! // Slices. Works on vector, too.
 //! let mut s = [5.0, std::f64::NAN, 3.0, 2.0];
-//! s.ord_subset_sort();
+//! s.ord_subset_sort_unstable();
 //! assert_eq!(&s[0..3], &[2.0, 3.0, 5.0]);
 //! assert_eq!(s.ord_subset_binary_search(&5.0), Ok(2));
 //!
@@ -38,6 +38,13 @@
 //! http://opensource.org/licenses/MIT, at your
 //! option. This file may not be copied, modified, or distributed
 //! except according to those terms.
+//#![cfg_attr(feature="unstable", unstable)]
+#![cfg_attr(feature="unstable", feature(core_float))]
+
+#![cfg_attr(not(feature = "std"), no_std)]
+#[cfg(feature="std")] // attribute not necessary, but rls warns without
+extern crate core;
+
 mod iter_ext;
 mod ord_var;
 // for ord_subset_min_by()

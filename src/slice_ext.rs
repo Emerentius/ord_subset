@@ -5,7 +5,7 @@
 // except according to those terms.
 
 use ord_subset_trait::*;
-use std::cmp::Ordering::{self, Greater, Equal, Less};
+use core::cmp::Ordering::{self, Greater, Equal, Less};
 
 // Wrapper for comparison functions
 // Treats unordered values as greater than any ordered
@@ -32,6 +32,7 @@ pub trait OrdSubsetSliceExt<T> {
 	/// # Panics
 	///
 	/// Panics when `a.partial_cmp(b)` returns `None` for two values `a`,`b` inside the total order (Violated OrdSubset contract).
+	#[cfg(feature="std")]
 	fn ord_subset_sort(&mut self) where T: OrdSubset;
 
 	/// **UNSTABLE** Will likely remove these. Easily recreated by `.sort_by()`
@@ -41,6 +42,7 @@ pub trait OrdSubsetSliceExt<T> {
 	/// # Panics
 	///
 	/// Panics when `a.partial_cmp(b)` returns `None` for two values `a`,`b` inside the total order (Violated OrdSubset contract).
+	#[cfg(feature="std")]
 	fn ord_subset_sort_rev(&mut self) where T: OrdSubset;
 
 	/// Sorts the slice, using `compare` to order elements. Values outside the total order are put at the end in their original order.
@@ -55,6 +57,7 @@ pub trait OrdSubsetSliceExt<T> {
 	/// # Panics
 	///
 	/// Panics when `a.partial_cmp(b)` returns `None` for two values `a`,`b` inside the total order (Violated OrdSubset contract).
+	#[cfg(feature="std")]
 	fn ord_subset_sort_by<F>(&mut self, compare: F)
 		where T: OrdSubset,
 		      F: FnMut(&T, &T) -> Ordering;
@@ -64,6 +67,7 @@ pub trait OrdSubsetSliceExt<T> {
 	///
 	/// This delegates to `.sort_by()` in the std library. See [official docs](https://doc.rust-lang.org/std/primitive.slice.html#method.sort_by) for
 	/// time and space complexity of the current implementation.
+	#[cfg(feature="std")]
 	fn ord_subset_sort_by_key<B, F>(&mut self, f: F)
 		where B: OrdSubset,
 		      F: FnMut(&T) -> B;
@@ -172,12 +176,14 @@ pub trait OrdSubsetSliceExt<T> {
 
 impl<T> OrdSubsetSliceExt<T> for [T]
 {
+	#[cfg(feature="std")]
 	fn ord_subset_sort(&mut self)
 		where T: OrdSubset,
 	{
 		self.ord_subset_sort_by(|a,b| a.partial_cmp(b).expect("Violated OrdSubset contract: a.partial_cmp(b) == None for a,b inside total order"))
 	}
 
+	#[cfg(feature="std")]
 	fn ord_subset_sort_by<F>(&mut self, mut compare: F)
 		where T: OrdSubset,
 		      F: FnMut(&T, &T) -> Ordering
@@ -186,12 +192,15 @@ impl<T> OrdSubsetSliceExt<T> for [T]
 			compare_unordered_greater_everything(a, b, &mut compare)
 		)
 	}
+
+	#[cfg(feature="std")]
 	fn ord_subset_sort_rev(&mut self)
 		where T: OrdSubset,
 	{
 		self.ord_subset_sort_by(|a,b| b.partial_cmp(a).expect("Violated OrdSubset contract: a.partial_cmp(b) == None for a,b inside total order"))
 	}
 
+	#[cfg(feature="std")]
 	fn ord_subset_sort_by_key<B, F>(&mut self, mut f: F)
 		where B: OrdSubset,
 		      F: FnMut(&T) -> B
@@ -278,11 +287,14 @@ impl<T, U> OrdSubsetSliceExt<T> for U
 	where U: AsRef<[T]> + AsMut<[T]>,
 	      [T]: OrdSubsetSliceExt<T>,
 {
+	#[cfg(feature="std")]
 	fn ord_subset_sort(&mut self)
 		where T: OrdSubset,
 	{
 		self.as_mut().ord_subset_sort()
 	}
+
+	#[cfg(feature="std")]
 	fn ord_subset_sort_by<F>(&mut self, compare: F)
 		where T: OrdSubset,
 		      F: FnMut(&T, &T) -> Ordering,
@@ -290,12 +302,14 @@ impl<T, U> OrdSubsetSliceExt<T> for U
 		self.as_mut().ord_subset_sort_by(compare)
 	}
 
+	#[cfg(feature="std")]
 	fn ord_subset_sort_rev(&mut self)
 		where T: OrdSubset,
 	{
 		self.as_mut().ord_subset_sort_rev();
 	}
 
+	#[cfg(feature="std")]
 	fn ord_subset_sort_by_key<B, F>(&mut self, f: F)
 		where B: OrdSubset,
 		      F: FnMut(&T) -> B

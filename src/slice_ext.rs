@@ -5,7 +5,7 @@
 // except according to those terms.
 
 use ord_subset_trait::*;
-use std::cmp::Ordering::{self, Greater, Less};
+use std::cmp::Ordering::{self, Greater, Equal, Less};
 
 // Wrapper for comparison functions
 // Treats unordered values as greater than any ordered
@@ -14,17 +14,18 @@ fn compare_unordered_greater_everything<T: OrdSubset, F>(a: &T, b: &T, mut compa
 {
 	match (a.is_outside_order(), b.is_outside_order()) {
 			// catch invalids and put them at the end
-			// (true, true) Ordering is irrelevant (except for performance possibly)
-			// however, handling that would tightly bind this to the sort algorithm
-			// that is delegated to
-			(true, false) | (true, true) => Greater,
+			// Ordering of two-non-ords in the (true, true) case is irrelevant
+			// for the goal of collecting them at the end. However, comparing them
+			// as equal will let the algorithm uphold its stability properties
+			(true, true) => Equal,
+			(true, false) => Greater,
 			(false, true) => Less,
 			(false, false) => compare(a,b), // the normal case, both valid. Here user function applies.
 	}
 }
 
 pub trait OrdSubsetSliceExt<T> {
-	/// Sort the slice, in place. Values outside the ordered subset are put at the end in no particular order.
+	/// Sort the slice, in place. Values outside the ordered subset are put at the end in their original order.
 	///
 	/// This is equivalent to `self.ord_subset_sort_by(|a,b| a.partial_cmp(b).unwrap())`
 	///
@@ -35,20 +36,21 @@ pub trait OrdSubsetSliceExt<T> {
 
 	/// **UNSTABLE** Will likely remove these. Easily recreated by `.sort_by()`
 	///
-	/// Sort the slice in reverse order, in place. Values outside the ordered subset are put at the end in no particular order.
+	/// Sort the slice in reverse order, in place. Values outside the ordered subset are put at the end in their original order (i.e. not reversed).
 	///
 	/// # Panics
 	///
 	/// Panics when `a.partial_cmp(b)` returns `None` for two values `a`,`b` inside the total order (Violated OrdSubset contract).
 	fn ord_subset_sort_rev(&mut self) where T: OrdSubset;
 
-	/// Sorts the slice, in place, using compare to compare elements. Values outside the total order are put at the end. The comparator will not be called on them. If you wish to handle these yourself, use the regular `.sort_by()`.
-	/// The comparator function will only be used for elements inside the total order.
+	/// Sorts the slice, in place, using `compare` to order elements. Values outside the total order are put at the end in their original order.
+	/// `compare` will not be called on them. If you wish to handle these yourself, use the regular `.sort_by()`.
 	///
-	/// **Warning:** The function interface is identical to the `.sort_by()` interface. Be careful not to miss `ord_subset_` in front. It would work until you have unordered values in your slice, then crash unexpectedly.
+	/// **Warning:** The function interface is identical to the `.sort_by()` interface. Be careful not to miss `ord_subset_` in front.
+	/// It would work until you have unordered values in your slice, then crash unexpectedly.
 	///
-	/// This uses the sort in the std library. It is therefore `O(n log n)` worst-case, but allocates approximately `2 * n`, where `n` is the length of `self`.
-	/// It is stable for values inside total order but may shuffle values outside of it. May become very inefficient if many unordered values exist.
+	/// This delegates to `.sort_by()` in the std library. See [official docs](https://doc.rust-lang.org/std/primitive.slice.html#method.sort_by) for
+	/// time and space complexity of the current implementation.
 	///
 	/// # Panics
 	///
@@ -57,14 +59,10 @@ pub trait OrdSubsetSliceExt<T> {
 		where T: OrdSubset,
 		      F: FnMut(&T, &T) -> Ordering;
 
-	/* FIXME:  CORRECT DOCUMENTATION
-
-			  add this (can't be delegated to std lib)
-	          Have to filter inputs before passing to key extraction function
-	*/
 	/// Sorts the slice, in place, using `key` to extract a key by which to order the sort by.
 	///
-	/// This sort is stable and `O(n log n)` worst-case but allocates approximately `2 * n`, where `n` is the length of `self`.
+	/// This delegates to `.sort_by()` in the std library. See [official docs](https://doc.rust-lang.org/std/primitive.slice.html#method.sort_by) for
+	/// time and space complexity of the current implementation.
 	fn ord_subset_sort_by_key<B, F>(&mut self, f: F)
 		where B: OrdSubset,
 		      F: FnMut(&T) -> B;

@@ -164,7 +164,7 @@ fn binary_search_by_key_failure() {
 	let mut s = (-5i32..6).map(|num| num as f64).collect::<Vec<_>>();
 	s.ord_subset_sort_by_key(key_function);
 
-	let mut keys = s.iter().map(key_function).collect::<Vec<_>>();
+	let keys = s.iter().map(key_function).collect::<Vec<_>>();
 
 	// -1 because two elements are looked at
 	// -1 to leave trailing 0 out

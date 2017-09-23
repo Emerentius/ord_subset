@@ -42,9 +42,9 @@ impl<T: PartialOrd + PartialEq> OrdVar<T> {
 		}
 	}
 
-	/// Constructs an `OrdVar` without validity check. Incorrectly constructed `OrdVar`s may panic during comparisons.
-	/// This is the only way to construct an `OrdVar` out of a type that is not `OrdSubset`.
-	pub unsafe fn new_unchecked(data: T) -> OrdVar<T> {
+	/// Constructs an `OrdVar` without validity check. Incorrectly constructed `OrdVar`s may panic on calls to `.cmp()`.
+	/// The comparison operators (`>`, `>=`, `=`, `!=`, `<`, `<=`) will not panic but may result in surprising behaviour.
+	pub fn new_unchecked(data: T) -> OrdVar<T> {
 		OrdVar(data)
 	}
 

@@ -177,13 +177,15 @@ pub trait OrdSubsetSliceExt<T> {
 	fn ord_subset_binary_search_rev(&self, x: &T) -> Result<usize, usize> where T: OrdSubset;
 }
 
-impl<T> OrdSubsetSliceExt<T> for [T]
+//impl<T> OrdSubsetSliceExt<T> for [T]
+impl<T, U> OrdSubsetSliceExt<T> for U
+	where U: AsRef<[T]> + AsMut<[T]>,
 {
 	#[cfg(feature="std")]
 	fn ord_subset_sort(&mut self)
 		where T: OrdSubset,
 	{
-		self.ord_subset_sort_by(|a,b| a.cmp_unwrap(b))
+		self.as_mut().ord_subset_sort_by(|a,b| a.cmp_unwrap(b))
 	}
 
 	#[cfg(feature="std")]
@@ -191,7 +193,7 @@ impl<T> OrdSubsetSliceExt<T> for [T]
 		where T: OrdSubset,
 		      F: FnMut(&T, &T) -> Ordering
 	{
-		self.sort_by(|a, b|
+		self.as_mut().sort_by(|a, b|
 			cmp_unordered_greater_all(a, b, &mut compare)
 		)
 	}
@@ -200,7 +202,7 @@ impl<T> OrdSubsetSliceExt<T> for [T]
 	fn ord_subset_sort_rev(&mut self)
 		where T: OrdSubset,
 	{
-		self.ord_subset_sort_by(|a,b| b.cmp_unwrap(a))
+		self.as_mut().ord_subset_sort_by(|a,b| b.cmp_unwrap(a))
 	}
 
 	#[cfg(feature="std")]
@@ -208,34 +210,34 @@ impl<T> OrdSubsetSliceExt<T> for [T]
 		where B: OrdSubset,
 		      F: FnMut(&T) -> B
 	{
-		self.sort_by(|a, b| cmp_unordered_greater_all(&(f(a)), &(f(b)), CmpUnwrap::cmp_unwrap))
+		self.as_mut().sort_by(|a, b| cmp_unordered_greater_all(&(f(a)), &(f(b)), CmpUnwrap::cmp_unwrap))
 	}
 
 	fn ord_subset_sort_unstable(&mut self)
 		where T: OrdSubset,
 	{
-		self.ord_subset_sort_unstable_by(|a,b| a.cmp_unwrap(b))
+		self.as_mut().ord_subset_sort_unstable_by(|a,b| a.cmp_unwrap(b))
 	}
 
 	fn ord_subset_sort_unstable_by<F>(&mut self, mut compare: F)
 		where T: OrdSubset,
 		      F: FnMut(&T, &T) -> Ordering
 	{
-		self.sort_unstable_by(|a, b|
+		self.as_mut().sort_unstable_by(|a, b|
 			cmp_unordered_greater_all(a, b, &mut compare)
 		)
 	}
 	fn ord_subset_sort_unstable_rev(&mut self)
 		where T: OrdSubset,
 	{
-		self.ord_subset_sort_unstable_by(|a,b| b.cmp_unwrap(a))
+		self.as_mut().ord_subset_sort_unstable_by(|a,b| b.cmp_unwrap(a))
 	}
 
 	fn ord_subset_sort_unstable_by_key<B, F>(&mut self, mut f: F)
 		where B: OrdSubset,
 		      F: FnMut(&T) -> B
 	{
-		self.sort_unstable_by(|a, b| cmp_unordered_greater_all(&(f(a)), &(f(b)), CmpUnwrap::cmp_unwrap))
+		self.as_mut().sort_unstable_by(|a, b| cmp_unordered_greater_all(&(f(a)), &(f(b)), CmpUnwrap::cmp_unwrap))
 	}
 
 	fn ord_subset_binary_search(&self, x: &T) -> Result<usize, usize>
@@ -251,7 +253,7 @@ impl<T> OrdSubsetSliceExt<T> for [T]
 		where T: OrdSubset,
 		      F: FnMut(&T) -> Ordering
 	{
-		self.binary_search_by( |other| {
+		self.as_ref().binary_search_by( |other| {
 			match other.is_outside_order() {
 				true  => Greater, // unordered always at end
 				false => f(other),
@@ -270,7 +272,7 @@ impl<T> OrdSubsetSliceExt<T> for [T]
 			a.partial_cmp(b)
 				.expect(ERROR_BINARY_SEARCH_EXPECT)
 		};
-		self.binary_search_by(|k| cmp_unordered_greater_all(&f(k), b, &cmp_ord))
+		self.as_ref().binary_search_by(|k| cmp_unordered_greater_all(&f(k), b, &cmp_ord))
 	}
 
 	fn ord_subset_binary_search_rev(&self, x: &T) -> Result<usize, usize>
@@ -280,94 +282,5 @@ impl<T> OrdSubsetSliceExt<T> for [T]
 		self.ord_subset_binary_search_by(|other| {
 			x.partial_cmp(other).expect(ERROR_BINARY_SEARCH_EXPECT)
 		})
-	}
-}
-
-impl<T, U> OrdSubsetSliceExt<T> for U
-	where U: AsRef<[T]> + AsMut<[T]>,
-	      [T]: OrdSubsetSliceExt<T>,
-{
-	#[cfg(feature="std")]
-	fn ord_subset_sort(&mut self)
-		where T: OrdSubset,
-	{
-		self.as_mut().ord_subset_sort()
-	}
-
-	#[cfg(feature="std")]
-	fn ord_subset_sort_by<F>(&mut self, compare: F)
-		where T: OrdSubset,
-		      F: FnMut(&T, &T) -> Ordering,
-	{
-		self.as_mut().ord_subset_sort_by(compare)
-	}
-
-	#[cfg(feature="std")]
-	fn ord_subset_sort_rev(&mut self)
-		where T: OrdSubset,
-	{
-		self.as_mut().ord_subset_sort_rev();
-	}
-
-	#[cfg(feature="std")]
-	fn ord_subset_sort_by_key<B, F>(&mut self, f: F)
-		where B: OrdSubset,
-		      F: FnMut(&T) -> B
-	{
-		self.as_mut().ord_subset_sort_by_key(f)
-	}
-
-	fn ord_subset_sort_unstable(&mut self)
-		where T: OrdSubset,
-	{
-		self.as_mut().ord_subset_sort_unstable()
-	}
-
-	fn ord_subset_sort_unstable_by<F>(&mut self, compare: F)
-		where T: OrdSubset,
-		      F: FnMut(&T, &T) -> Ordering,
-	{
-		self.as_mut().ord_subset_sort_unstable_by(compare)
-	}
-
-	fn ord_subset_sort_unstable_rev(&mut self)
-		where T: OrdSubset,
-	{
-		self.as_mut().ord_subset_sort_unstable_rev();
-	}
-
-	fn ord_subset_sort_unstable_by_key<B, F>(&mut self, f: F)
-		where B: OrdSubset,
-		      F: FnMut(&T) -> B
-	{
-		self.as_mut().ord_subset_sort_unstable_by_key(f)
-	}
-
-	fn ord_subset_binary_search(&self, x: &T) -> Result<usize, usize>
-		where T: OrdSubset,
-	{
-		self.as_ref().ord_subset_binary_search(x)
-	}
-
-	fn ord_subset_binary_search_by<F>(&self, f: F) -> Result<usize, usize>
-		where //U: AsRef<[T]>,
-		      T: OrdSubset,
-		      F: FnMut(&T) -> Ordering
-	{
-		self.as_ref().ord_subset_binary_search_by(f)
-	}
-
-	fn ord_subset_binary_search_by_key<B, F>(&self, b: &B, f: F) -> Result<usize, usize>
-		where B: OrdSubset,
-		      F: FnMut(&T) -> B
-	{
-		self.as_ref().ord_subset_binary_search_by_key(b, f)
-	}
-
-	fn ord_subset_binary_search_rev(&self, x: &T) -> Result<usize, usize>
-		where // U: AsRef<[T]>,
-		      T: OrdSubset,
-	{
-		self.as_ref().ord_subset_binary_search_rev(x)
 	}
 }

@@ -37,7 +37,8 @@ const SORTED_TEST_ARRAY_NO_NAN: [f64; N_NO_NAN] =
 	23.0, 24.0, 25.0, 26.0, 27.0, INF             ];
 
 
-struct NotOrdSubset();
+#[derive(PartialEq, PartialOrd, Clone, Copy)]
+struct NotOrdSub();
 #[derive(PartialEq, PartialOrd, Clone, Copy)]
 struct OrdSub();
 
@@ -80,9 +81,9 @@ fn ord_subset_min_by() {
 // This is a compile time test. It can't fail at runtime.
 // The referenced functions must accept iters of values, that are not OrdSubset
 // if the closure produces OrdSubset values
-#[test]
+#[allow(unused)]
 fn ord_subset_min_or_max_by_key() {
-	let array: [NotOrdSubset; 0] = [];
+	let array: [NotOrdSub; 0] = [];
 	array.iter().ord_subset_min_by_key(|_| 0.0);
 	array.iter().ord_subset_max_by_key(|_| 0.0);
 }
@@ -252,8 +253,15 @@ fn binary_search_by_key_err() {
 // all implement the OrdSubsetSliceExt trait, no matter the mutability.
 #[allow(unused)]
 fn ord_subset_slice_ext_impl_test() {
-	fn foo<T: OrdSubsetSliceExt<U>, U>(_: T) {}
-
+	fn foo<T: OrdSubsetSliceExt<U> + AsRef<[U]>, U: OrdSubset + Clone>(as_slice: T) {
+		// would panic, good thing it doesn't run
+		let element: &U = as_slice.as_ref().first().unwrap();
+		as_slice.ord_subset_binary_search(element);
+		as_slice.ord_subset_binary_search_rev(element);
+		as_slice.ord_subset_binary_search_by_key(element, |_| element.clone());
+		as_slice.ord_subset_binary_search_by(|_| std::cmp::Ordering::Equal);
+	}
+	
 	let mut vec: Vec<OrdSub> = vec![];
 	let mut arr: [OrdSub; 0] = [];
 
@@ -303,6 +311,76 @@ fn ord_subset_mut_slice_ext_impl_test() {
 
 	let mut vec: Vec<OrdSub> = vec![];
 	let mut arr: [OrdSub; 0] = [];
+
+	sortable(&mut vec);
+	sortable(&mut arr);
+	sortable(&mut arr[..]);
+	sortable(&mut &mut arr[..]);
+	// owned
+	sortable(vec);
+	sortable(arr);
+}
+
+// check that slices, arrays and vecs as well as references of non-OrdSubset items
+// all implement the OrdSubsetSliceExt trait and allow binary_search_by_key.
+#[allow(unused)]
+fn non_ord_subset_slice_ext_impl_test() {
+	/*
+	fn foo<T: OrdSubsetSliceExt<U> + AsRef<[U]>, U: Clone>(as_slice: T) {
+		// would panic, good thing it doesn't run
+		let element: &U = as_slice.as_ref().first().unwrap();
+		as_slice.ord_subset_binary_search(element);
+		as_slice.ord_subset_binary_search_rev(element);
+		as_slice.ord_subset_binary_search_by_key(element, |_| element.clone());
+		as_slice.ord_subset_binary_search_by(|_| std::cmp::Ordering::Equal);
+	}
+	*/
+	fn foo<T: OrdSubsetSliceExt<U> + AsRef<[U]>, U>(as_slice: T) {
+		let key = OrdSub();
+		as_slice.ord_subset_binary_search_by_key(&key, |_| key);
+	}
+
+	let mut vec: Vec<NotOrdSub> = vec![];
+	let mut arr: [NotOrdSub; 0] = [];
+
+	// &vec
+	foo(&vec);
+	foo(&mut vec);
+
+	// &array
+	foo(&arr);
+	foo(&mut arr);
+
+	// &slice
+	foo(&arr[..]);
+	foo(&mut arr[..]);
+
+	// &&slice
+	foo(&&arr[..]);
+	foo(&mut &mut arr[..]);
+	foo(& &mut arr[..]);
+
+	// owned
+	foo(vec);
+	foo(arr);
+}
+
+// check that mutable vecs, arrays and slices of non-OrdSubset types are all sortable by key
+#[allow(unused)]
+fn non_ord_subset_mut_slice_ext_impl_test() {
+	fn sortable<T, U>(mut as_slice: T) 
+		where T: OrdSubsetSliceExt<U> + AsMut<[U]>,
+	{
+		let key = OrdSub();
+
+		#[cfg(feature="std")]
+		as_slice.ord_subset_sort_by_key(|_| key);
+
+		as_slice.ord_subset_sort_unstable_by_key(|_| key);
+	}
+
+	let mut vec: Vec<NotOrdSub> = vec![];
+	let mut arr: [NotOrdSub; 0] = [];
 
 	sortable(&mut vec);
 	sortable(&mut arr);

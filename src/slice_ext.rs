@@ -41,8 +41,6 @@ pub trait OrdSubsetSliceExt<T> {
 		where Self: AsMut<[T]>,
 			  T: OrdSubset;
 		      
-	/// **UNSTABLE** Will likely remove these. Easily recreated by `.sort_by()`
-	///
 	/// Sort the slice in reverse order. Values outside the ordered subset are put at the end in their original order (i.e. not reversed).
 	///
 	/// # Panics
@@ -93,8 +91,6 @@ pub trait OrdSubsetSliceExt<T> {
 		where Self: AsMut<[T]>,
 		      T: OrdSubset;
 	
-	/// **UNSTABLE** Will likely remove these. Easily recreated by `.sort_by()`
-	///
 	/// Sort the slice in reverse order. Values outside the ordered subset are put at the end.
 	///
 	/// # Panics
@@ -178,8 +174,6 @@ pub trait OrdSubsetSliceExt<T> {
 		where B: OrdSubset,
 		      F: FnMut(&T) -> B;
 
-	/// **UNSTABLE** Will likely remove these. Easily recreated by `.binary_search_by()`
-	///
 	/// Binary search a slice sorted in reverse order for a given element. Values outside the ordered subset need to be at the end of the slice.
 	///
 	/// If a matching value is found then returns Ok, containing the index for the matched element; if no match is found then Err is returned, containing the index where a matching element could be inserted while maintaining sorted order.

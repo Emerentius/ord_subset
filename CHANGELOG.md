@@ -22,7 +22,8 @@ but no memory unsafety
 Unreleased
 ==========
 * Added `sort_unstable*` variants
+* Generalized traits so that `.ord_subset_binary_search*` works on immutable slices and anything else that implements AsRef<[T]>, but not AsMut<[T]> (major oversight)
 * #![no_std] support with new opt-out feature "std"
   Stable sorts and OrdSubset implementations for f32 and f64 are unavailable in no_std mode 
   The latter can be regained but this depends on the unstable "core_float" feature gate (as of 2017-09-20, rustc 1.22), opt in via this crate's "unstable" feature
-* Generalized traits so that `.ord_subset_binary_search*` works on immutable slices and anything else that implements AsRef<[T]>, but not AsMut<[T]>
+* Stabilized `_rev()` variants

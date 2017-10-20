@@ -7,9 +7,12 @@
 use ord_subset_trait::*;
 use core::cmp::Ordering::{self, Greater, Equal, Less};
 
+static ERROR_BINARY_SEARCH_OUTSIDE_ORDER: &str = "Attempted binary search for value outside total order";
+static ERROR_BINARY_SEARCH_EXPECT: &str = "Unexpected None for a.partial_cmp(b), a,b inside order. Violated OrdSubset contract or attempted binary search on unsorted data";
+
 // Wrapper for comparison functions
 // Treats unordered values as greater than any ordered
-fn compare_unordered_greater_everything<T: OrdSubset, F>(a: &T, b: &T, mut compare: F) -> Ordering
+fn cmp_unordered_greater_all<T: OrdSubset, F>(a: &T, b: &T, mut compare: F) -> Ordering
 	where F: FnMut(&T, &T) -> Ordering,
 {
 	match (a.is_outside_order(), b.is_outside_order()) {
@@ -180,7 +183,7 @@ impl<T> OrdSubsetSliceExt<T> for [T]
 	fn ord_subset_sort(&mut self)
 		where T: OrdSubset,
 	{
-		self.ord_subset_sort_by(|a,b| a.partial_cmp(b).expect("Violated OrdSubset contract: a.partial_cmp(b) == None for a,b inside total order"))
+		self.ord_subset_sort_by(|a,b| a.cmp_unwrap(b))
 	}
 
 	#[cfg(feature="std")]
@@ -189,7 +192,7 @@ impl<T> OrdSubsetSliceExt<T> for [T]
 		      F: FnMut(&T, &T) -> Ordering
 	{
 		self.sort_by(|a, b|
-			compare_unordered_greater_everything(a, b, &mut compare)
+			cmp_unordered_greater_all(a, b, &mut compare)
 		)
 	}
 
@@ -197,7 +200,7 @@ impl<T> OrdSubsetSliceExt<T> for [T]
 	fn ord_subset_sort_rev(&mut self)
 		where T: OrdSubset,
 	{
-		self.ord_subset_sort_by(|a,b| b.partial_cmp(a).expect("Violated OrdSubset contract: a.partial_cmp(b) == None for a,b inside total order"))
+		self.ord_subset_sort_by(|a,b| b.cmp_unwrap(a))
 	}
 
 	#[cfg(feature="std")]
@@ -205,16 +208,13 @@ impl<T> OrdSubsetSliceExt<T> for [T]
 		where B: OrdSubset,
 		      F: FnMut(&T) -> B
 	{
-		// FIXME: This is a contract error, not a library error (error message)
-		let cmp_ord = |a: &B, b: &B| a.partial_cmp(b).expect("Internal ord_subset error. Reached supposedly unreachable code path in ord_subset_binary_search_by_key");
-
-		self.sort_by(|a, b| compare_unordered_greater_everything(&(f(a)), &(f(b)), &cmp_ord))
+		self.sort_by(|a, b| cmp_unordered_greater_all(&(f(a)), &(f(b)), CmpUnwrap::cmp_unwrap))
 	}
 
 	fn ord_subset_sort_unstable(&mut self)
 		where T: OrdSubset,
 	{
-		self.ord_subset_sort_unstable_by(|a,b| a.partial_cmp(b).expect("Violated OrdSubset contract: a.partial_cmp(b) == None for a,b inside total order"))
+		self.ord_subset_sort_unstable_by(|a,b| a.cmp_unwrap(b))
 	}
 
 	fn ord_subset_sort_unstable_by<F>(&mut self, mut compare: F)
@@ -222,31 +222,28 @@ impl<T> OrdSubsetSliceExt<T> for [T]
 		      F: FnMut(&T, &T) -> Ordering
 	{
 		self.sort_unstable_by(|a, b|
-			compare_unordered_greater_everything(a, b, &mut compare)
+			cmp_unordered_greater_all(a, b, &mut compare)
 		)
 	}
 	fn ord_subset_sort_unstable_rev(&mut self)
 		where T: OrdSubset,
 	{
-		self.ord_subset_sort_unstable_by(|a,b| b.partial_cmp(a).expect("Violated OrdSubset contract: a.partial_cmp(b) == None for a,b inside total order"))
+		self.ord_subset_sort_unstable_by(|a,b| b.cmp_unwrap(a))
 	}
 
 	fn ord_subset_sort_unstable_by_key<B, F>(&mut self, mut f: F)
 		where B: OrdSubset,
 		      F: FnMut(&T) -> B
 	{
-		// FIXME: This is a contract error, not a library error (error message)
-		let cmp_ord = |a: &B, b: &B| a.partial_cmp(b).expect("Internal ord_subset error. Reached supposedly unreachable code path in ord_subset_binary_search_by_key");
-
-		self.sort_unstable_by(|a, b| compare_unordered_greater_everything(&(f(a)), &(f(b)), &cmp_ord))
+		self.sort_unstable_by(|a, b| cmp_unordered_greater_all(&(f(a)), &(f(b)), CmpUnwrap::cmp_unwrap))
 	}
 
 	fn ord_subset_binary_search(&self, x: &T) -> Result<usize, usize>
 		where T: OrdSubset,
 	{
-		if x.is_outside_order() { panic!("Attempted binary search for value outside total order") };
+		if x.is_outside_order() { panic!(ERROR_BINARY_SEARCH_OUTSIDE_ORDER) };
 		self.ord_subset_binary_search_by(|other| {
-			other.partial_cmp(x).expect("Violated OrdSubset contract: a.partial_cmp(b) == None for a,b inside total order")
+			other.partial_cmp(x).expect(ERROR_BINARY_SEARCH_EXPECT)
 		})
 	}
 
@@ -266,19 +263,22 @@ impl<T> OrdSubsetSliceExt<T> for [T]
 		where B: OrdSubset,
 		      F: FnMut(&T) -> B
 	{
-		if b.is_outside_order() { panic!("Attempted binary search for value outside total order") };
+		if b.is_outside_order() { panic!(ERROR_BINARY_SEARCH_OUTSIDE_ORDER) };
 		// compare ordered values as expected
 		// wrap it in a function that deals with unordered, so this one never sees them
-		let cmp_ord = |a: &B, b: &B| a.partial_cmp(b).expect("Internal ord_subset error. Reached supposedly unreachable code path in ord_subset_binary_search_by_key");
-		self.binary_search_by(|k| compare_unordered_greater_everything(&f(k), b, &cmp_ord))
+		let cmp_ord = |a: &B, b: &B| {
+			a.partial_cmp(b)
+				.expect(ERROR_BINARY_SEARCH_EXPECT)
+		};
+		self.binary_search_by(|k| cmp_unordered_greater_all(&f(k), b, &cmp_ord))
 	}
 
 	fn ord_subset_binary_search_rev(&self, x: &T) -> Result<usize, usize>
 		where T: OrdSubset,
 	{
-		if x.is_outside_order() { panic!("Attempted binary search for value outside total order") };
+		if x.is_outside_order() { panic!(ERROR_BINARY_SEARCH_OUTSIDE_ORDER) };
 		self.ord_subset_binary_search_by(|other| {
-			x.partial_cmp(other).expect("Violated OrdSubset contract: a.partial_cmp(b) == None for a,b inside total order")
+			x.partial_cmp(other).expect(ERROR_BINARY_SEARCH_EXPECT)
 		})
 	}
 }

@@ -55,3 +55,12 @@ impl OrdSubset for f32 {
 		}
 	}
 }
+
+// Small helper used a lot in sorts
+pub(crate) trait CmpUnwrap: OrdSubset {
+	fn cmp_unwrap(&self, other: &Self) -> ::core::cmp::Ordering {
+		self.partial_cmp(other).expect("Violated OrdSubset contract: a.partial_cmp(b) == None for a,b inside total order")
+	}
+}
+
+impl<T: OrdSubset> CmpUnwrap for T {}

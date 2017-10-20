@@ -1,37 +1,79 @@
-// FIXME: Add tests for unstable sorts
-// 		  Make test suite compatible with --no-default-features
-
 extern crate ord_subset;
+extern crate core;
 use ord_subset::OrdSubsetIterExt;
 use ord_subset::OrdSubsetSliceExt;
+use ord_subset::OrdSubset;
+use ord_subset::OrdVar;
+
+use std::f64::INFINITY as INF;
+use std::f64::NAN;
+
+const N: usize = 32;
+const N_NO_NAN: usize = 30;
+
+const TEST_ARRAY: [f64; N] =
+	[1.0,  7.0,  26.0,  INF,  NAN,  0.0, 14.0, 17.0,
+	27.0, 13.0,  10.0,  3.0,  NAN, 25.0,  9.0, 20.0,
+	16.0,  8.0,  -INF,  4.0,  2.0, 22.0, 18.0, 21.0,
+	15.0,  6.0,  24.0, 19.0, 12.0, 11.0,  5.0, 23.0];
+
+// subset of TEST_ARRAY
+const TEST_ARRAY_NO_NAN: [f64; N_NO_NAN] =
+	[1.0,  7.0,  26.0,  INF,        0.0, 14.0, 17.0,
+	27.0, 13.0,  10.0,  3.0,       25.0,  9.0, 20.0,
+	16.0,  8.0,  -INF,  4.0,  2.0, 22.0, 18.0, 21.0,
+	15.0,  6.0,  24.0, 19.0, 12.0, 11.0,  5.0, 23.0];
+
+const SORTED_TEST_ARRAY: [f64; N] =
+	[-INF, 0.0,  1.0,  2.0,  3.0,  4.0,  5.0,  6.0,
+	 7.0,  8.0,  9.0, 10.0, 11.0, 12.0, 13.0, 14.0,
+	15.0, 16.0, 17.0, 18.0, 19.0, 20.0, 21.0, 22.0,
+	23.0, 24.0, 25.0, 26.0, 27.0,  INF,  NAN,  NAN];
+
+const SORTED_TEST_ARRAY_NO_NAN: [f64; N_NO_NAN] =
+	[-INF, 0.0,  1.0,  2.0,  3.0,  4.0,  5.0,  6.0,
+	 7.0,  8.0,  9.0, 10.0, 11.0, 12.0, 13.0, 14.0,
+	15.0, 16.0, 17.0, 18.0, 19.0, 20.0, 21.0, 22.0,
+	23.0, 24.0, 25.0, 26.0, 27.0, INF             ];
+
 
 struct NotOrdSubset();
+#[derive(PartialEq, PartialOrd, Clone, Copy)]
+struct OrdSub();
+
+impl OrdSubset for OrdSub {
+	fn is_outside_order(&self) -> bool {
+		true
+	}
+}
+
+// ---------------------------- iter ext methods -------------------------------
 
 #[test]
 fn ord_subset_max() {
-	let vec = vec![2.0, 3.0, 5.0, std::f64::NAN];
-	let max = vec.iter().ord_subset_max().unwrap();
+	let arr = [2.0, 3.0, 5.0, std::f64::NAN];
+	let max = arr.iter().ord_subset_max().unwrap();
 	assert_eq!(&5.0, max);
 }
 
 #[test]
 fn ord_subset_max_by() {
-	let vec = vec![2.0, 3.0, 5.0, std::f64::NAN];
-	let max_by = vec.iter().ord_subset_max_by_key(|num| num.recip()).unwrap();
+	let arr = [2.0, 3.0, 5.0, std::f64::NAN];
+	let max_by = arr.iter().ord_subset_max_by_key(|num| num.recip()).unwrap();
 	assert_eq!(&2.0, max_by);
 }
 
 #[test]
 fn ord_subset_min() {
-	let vec = vec![2.0, 3.0, 5.0, std::f64::NAN];
-	let min = vec.iter().ord_subset_min().unwrap();
+	let arr = [2.0, 3.0, 5.0, std::f64::NAN];
+	let min = arr.iter().ord_subset_min().unwrap();
 	assert_eq!(&2.0, min);
 }
 
 #[test]
 fn ord_subset_min_by() {
-	let vec = vec![2.0, 3.0, 5.0, std::f64::NAN];
-	let min_by = vec.iter().ord_subset_min_by_key(|num| num.recip()).unwrap();
+	let arr = [2.0, 3.0, 5.0, std::f64::NAN];
+	let min_by = arr.iter().ord_subset_min_by_key(|num| num.recip()).unwrap();
 	assert_eq!(&5.0, min_by);
 }
 
@@ -45,142 +87,230 @@ fn ord_subset_min_or_max_by_key() {
 	array.iter().ord_subset_max_by_key(|_| 0.0);
 }
 
+// ---------------------------slice ext methods --------------------------------
+// ----------------------------- stable sorts ----------------------------------
 
 #[test]
 #[cfg(feature="std")]
-fn vec_sort() {
-	use std::f64;
-	let mut vec = vec![5.0, 2.0, f64::INFINITY, 3.0, 5.0, 7.0, 27.0, f64::NAN, f64::NEG_INFINITY];
-	//let mut vec = vec![5, 2, 3, 5];
-	//vec.sort();
-	vec.ord_subset_sort();
-	assert_eq!(&vec[0..vec.len()-1], &[f64::NEG_INFINITY, 2.0, 3.0, 5.0, 5.0, 7.0, 27.0, f64::INFINITY]);
-}
-
-#[test]
-#[cfg(feature="std")]
-fn vec_rev_sort() {
-	use std::f64;
-	let mut vec = vec![5.0, 2.0, f64::INFINITY, 3.0, 5.0, 7.0, 27.0, f64::NAN, f64::NEG_INFINITY];
-	vec.ord_subset_sort_rev();
-	assert_eq!(&vec[0..vec.len()-1], &[f64::INFINITY, 27.0, 7.0, 5.0, 5.0, 3.0, 2.0, f64::NEG_INFINITY]);
-}
-
-#[test]
-fn vec_binary_search() {
-	use std::f64;
-	let mut vec = vec![5.0, 2.0, 3.0, 5.0, 5.0, 5.0, 7.0, 27.0, f64::NAN];
-	//let mut vec = vec![5, 2, 3, 5];
-	//vec.sort();
-	vec.ord_subset_sort_unstable();
-	//assert_eq!(&vec[0..4], &[2.0, 3.0, 5.0, 5.0]);
-	assert_eq!(vec.ord_subset_binary_search(&2.0), Ok(0));
-	assert_eq!(vec.ord_subset_binary_search(&3.0), Ok(1));
-
-	let idx = vec.ord_subset_binary_search(&5.0);
-	assert!((2..6).any(|n| Ok(n) == idx));
-}
-
-#[test]
-fn vec_rev_binary_search() {
-	use std::f64;
-	let mut vec = vec![5.0, 2.0, f64::INFINITY, 3.0, 5.0, 7.0, 27.0, f64::NAN, f64::NEG_INFINITY];
-	vec.ord_subset_sort_unstable_rev();
-	assert_eq!(&vec[0..vec.len()-1], &[f64::INFINITY, 27.0, 7.0, 5.0, 5.0, 3.0, 2.0, f64::NEG_INFINITY]);
-	assert_eq!(vec.ord_subset_binary_search_rev(&f64::NEG_INFINITY), Ok(7));
-	assert_eq!(vec.ord_subset_binary_search_rev(&2.0), Ok(6));
-	assert_eq!(vec.ord_subset_binary_search_rev(&3.0), Ok(5));
-	let idx = vec.ord_subset_binary_search_rev(&5.0); // duplicate
-	assert!((3..5).any(|n| Ok(n) == idx));
-	assert_eq!(vec.ord_subset_binary_search_rev(&7.0), Ok(2));
-	assert_eq!(vec.ord_subset_binary_search_rev(&27.0), Ok(1));
-	assert_eq!(vec.ord_subset_binary_search_rev(&f64::INFINITY), Ok(0));
-}
-
-
-#[test]
-#[cfg(feature="std")]
-fn array_rev_sort() {
-	use std::f64;
-
-	let mut s  = [0., 1., f64::NAN, 1., 1., 1., 2., 3., 5., 8., 13., 21., 34., 55., f64::NAN];
-	let s2     = [55., 34., 21., 13., 8., 5., 3., 2., 1., 1., 1., 1., 0., f64::NAN, f64::NAN];
-	s.ord_subset_sort_rev();
-	assert_eq!(&s[..s.len()-2], &s2[..s2.len()-2]);
+fn sort() {
+	let mut array = TEST_ARRAY;
+	array.ord_subset_sort();
+	assert_eq!(&array[0..N_NO_NAN], &SORTED_TEST_ARRAY_NO_NAN);
 }
 
 #[test]
 #[cfg(feature="std")]
-fn array_rev_sort_by() {
-	use std::f64;
+fn sort_rev() {
+	let mut array = TEST_ARRAY;
+	array.ord_subset_sort_rev();
 
-	let mut s  = [0., 1., f64::NAN, 1., 1., 1., 2., 3., 5., 8., 13., 21., 34., 55., f64::NAN];
-	let s2     = [55., 34., 21., 13., 8., 5., 3., 2., 1., 1., 1., 1., 0., f64::NAN, f64::NAN];
-	s.ord_subset_sort_by(|a,b| b.partial_cmp(a).unwrap());
-	assert_eq!(&s[..s.len()-2], &s2[..s2.len()-2]);
-}
+	let mut rev_sorted_array = SORTED_TEST_ARRAY_NO_NAN;
+	rev_sorted_array.reverse();
 
-// the equivalent reverse is in the docs for ord_subset_binary_search()
-#[test]
-fn array_rev_binary_search_with_nan() {
-	use std::f64;
-
-	let s = [55., 34., 21., 13., 8., 5., 3., 2., 1., 1., 1., 1., 0., f64::NAN, f64::NAN];
-
-	assert_eq!(s.ord_subset_binary_search_rev(&13.),  Ok(3));
-	assert_eq!(s.ord_subset_binary_search_rev(&4.),   Err(6));
-	assert_eq!(s.ord_subset_binary_search_rev(&100.), Err(0));
-	let r = s.ord_subset_binary_search_rev(&1.);
-	assert!(match r { Ok(8...11) => true, _ => false, });
-	assert_eq!(s.ord_subset_binary_search_rev(&f64::INFINITY), Err(0));
-	assert_eq!(s.ord_subset_binary_search_rev(&f64::NEG_INFINITY), Err(13));
+	assert_eq!(&array[0..N_NO_NAN], &rev_sorted_array);
 }
 
 #[test]
 #[cfg(feature="std")]
 fn sort_by_key() {
 	fn key_function(el: &f64) -> f64 {
-		el.recip()
+		(el - 13.0).recip()
 	}
-	let mut s = (-5i32..6).map(|num| num as f64).collect::<Vec<_>>();
-	let s_correctly_sorted = [-1.0f64, -2.0, -3.0, -4.0, -5.0, 5.0, 4.0, 3.0, 2.0, 1.0, 0.0];
-	s.ord_subset_sort_by_key(key_function);
-	assert_eq!(&s[..], &s_correctly_sorted[..]);
+	let mut array = TEST_ARRAY;
+	array.ord_subset_sort_by_key(key_function);
+	let mut std_sorted_array = TEST_ARRAY_NO_NAN;
+	std_sorted_array.sort_by_key(|num| OrdVar::new(key_function(num)));
+	assert_eq!(&array[..N_NO_NAN], &std_sorted_array);
+}
+
+// ----------------------------- unstable sorts --------------------------------
+
+#[test]
+fn sort_unstable() {
+	let mut array = TEST_ARRAY;
+	array.ord_subset_sort_unstable();
+	assert_eq!(&array[0..N_NO_NAN], &SORTED_TEST_ARRAY_NO_NAN);
 }
 
 #[test]
-fn binary_search_by_key_success() {
+fn sort_unstable_rev() {
+	let mut array = TEST_ARRAY;
+	array.ord_subset_sort_unstable_rev();
+
+	let mut rev_sorted_array = SORTED_TEST_ARRAY_NO_NAN;
+	rev_sorted_array.reverse();
+
+	assert_eq!(&array[0..N_NO_NAN], &rev_sorted_array);
+}
+
+#[test]
+fn sort_unstable_by_key() {
 	fn key_function(el: &f64) -> f64 {
-		el.recip()
+		(el - 13.0).recip()
 	}
+	let mut array = TEST_ARRAY;
+	array.ord_subset_sort_unstable_by_key(key_function);
+	let mut std_sorted_array = TEST_ARRAY_NO_NAN;
+	std_sorted_array.sort_unstable_by_key(|num| OrdVar::new(key_function(num)));
+	assert_eq!(&array[..N_NO_NAN], &std_sorted_array);
+}
 
-	let mut s = (-5i32..6).map(|num| num as f64).collect::<Vec<_>>();
-	s.ord_subset_sort_unstable_by_key(key_function);
+// ---------------------------- binary searches --------------------------------
 
-	for (i, num) in s.iter().take_while(|num| !num.is_nan()).enumerate() {
-		let pos = s.ord_subset_binary_search_by_key(&key_function(num), key_function);
-		assert_eq!(pos, Ok(i));
+#[test]
+fn binary_search() {
+	let array = SORTED_TEST_ARRAY;
+	for (i, num) in array.iter().enumerate().take(N_NO_NAN) {
+		assert_eq!(array.ord_subset_binary_search(&num), Ok(i));
 	}
 }
 
 #[test]
-fn binary_search_by_key_failure() {
+fn binary_search_rev() {
+	let mut array = TEST_ARRAY;
+	array.ord_subset_sort_unstable_rev();
+	for (i, num) in array.iter().enumerate().take(N_NO_NAN) {
+		assert_eq!(array.ord_subset_binary_search_rev(&num), Ok(i));
+	}
+}
+
+#[test]
+fn binary_search_by_key() {
 	fn key_function(el: &f64) -> f64 {
-		el.recip()
+		(el - 13.0).recip()
+	}
+	let mut array = TEST_ARRAY;
+	array.ord_subset_sort_unstable_by_key(key_function);
+	for num in array.iter().take(N_NO_NAN) {
+		let key = key_function(num);
+		match array.ord_subset_binary_search_by_key(&key, key_function) {
+			Err(_) => panic!("Did not find correct location of element"),
+			Ok(pos) => assert_eq!(key_function(&array[pos]), key),
+		}
+	}
+}
+
+// ------ binary search error cases ------
+
+#[test]
+fn binary_search_err() {
+	let array = SORTED_TEST_ARRAY;
+	for (i, num) in array.iter()
+		.enumerate()
+		.filter(|&(_, num)| num.is_finite())
+	{
+		let new_num = num + 0.5;
+		assert_eq!(array.ord_subset_binary_search(&new_num), Err(i+1));
+	}
+}
+
+#[test]
+fn binary_search_rev_err() {
+	let mut array = TEST_ARRAY;
+	array.ord_subset_sort_unstable_rev();
+	for (i, num) in array.iter()
+		.enumerate()
+		.filter(|&(_, num)| num.is_finite())
+	{
+		let new_num = num + 0.5;
+		assert_eq!(array.ord_subset_binary_search_rev(&new_num), Err(i));
+	}
+}
+
+#[test]
+fn binary_search_by_key_err() {
+	fn key_function(el: &f64) -> f64 {
+		(el - 13.0).recip()
+	}
+	let mut array = TEST_ARRAY;
+	array.ord_subset_sort_unstable_by_key(key_function);
+	for num in array.iter().take(N_NO_NAN) {
+		let key_diff = key_function(&(num+0.01))*1.01 + 0.01;
+		let pos = array.ord_subset_binary_search_by_key(&key_diff, key_function);
+		let pos_std = (&array[..N_NO_NAN]).binary_search_by_key(
+			&OrdVar::new(key_diff),
+			|num| OrdVar::new(key_function(num))
+		);
+		match (pos, pos_std) {
+			(Err(pos), Err(pos_std)) => assert!(pos == pos_std),
+			// the commented out match branch is also valid behaviour
+			// but this function is supposed to test as many error cases as possible
+			// by choosing key_diff the right way
+			//(Ok(pos), Ok(pos_std)) => {
+			//	let key1 = key_function(&array[pos]);
+			//	let key2 = key_function(&array[pos_std]);
+			//	assert!(key1 == key2);
+			//},
+			_ => panic!("Inconsistency between this library's and std's binary_search_by_key"),
+		}
+	}
+}
+
+// -------------------- compile time implementation tests ----------------------
+
+// check that slices, arrays and vecs as well as references
+// all implement the OrdSubsetSliceExt trait, no matter the mutability.
+#[allow(unused)]
+fn ord_subset_slice_ext_impl_test() {
+	fn foo<T: OrdSubsetSliceExt<U>, U>(_: T) {}
+
+	let mut vec: Vec<OrdSub> = vec![];
+	let mut arr: [OrdSub; 0] = [];
+
+	// &vec
+	foo(&vec);
+	foo(&mut vec);
+
+	// &array
+	foo(&arr);
+	foo(&mut arr);
+
+	// &slice
+	foo(&arr[..]);
+	foo(&mut arr[..]);
+
+	// &&slice
+	foo(&&arr[..]);
+	foo(&mut &mut arr[..]);
+	foo(& &mut arr[..]);
+
+	// owned
+	foo(vec);
+	foo(arr);
+}
+
+// check that mutable vecs, arrays and slices are all sortable
+#[allow(unused)]
+fn ord_subset_mut_slice_ext_impl_test() {
+	fn sortable<T, U>(mut as_slice: T) 
+		where T: OrdSubsetSliceExt<U> + AsMut<[U]>,
+		      U: OrdSubset,
+	{
+		#[cfg(feature="std")]
+		as_slice.ord_subset_sort();
+		#[cfg(feature="std")]
+		as_slice.ord_subset_sort_rev();
+		#[cfg(feature="std")]
+		as_slice.ord_subset_sort_by(|_, _| core::cmp::Ordering::Equal);
+		#[cfg(feature="std")]
+		as_slice.ord_subset_sort_by_key(|_| 0.0);
+
+		as_slice.ord_subset_sort_unstable();
+		as_slice.ord_subset_sort_unstable_rev();
+		as_slice.ord_subset_sort_unstable_by(|_, _| core::cmp::Ordering::Equal);
+		as_slice.ord_subset_sort_unstable_by_key(|_| 0.0);
 	}
 
-	let mut s = (-5i32..6).map(|num| num as f64).collect::<Vec<_>>();
-	s.ord_subset_sort_unstable_by_key(key_function);
+	let mut vec: Vec<OrdSub> = vec![];
+	let mut arr: [OrdSub; 0] = [];
 
-	let keys = s.iter().map(key_function).collect::<Vec<_>>();
-
-	// -1 because two elements are looked at
-	// -1 to leave trailing 0 out
-	for i in 0..keys.len() - 2 {
-		let avg = (keys[i] + keys[i+1]) / 2.0;
-		let pos = s.ord_subset_binary_search_by_key(&avg, key_function);
-		assert_eq!(pos, Err(i+1));
-	}
+	sortable(&mut vec);
+	sortable(&mut arr);
+	sortable(&mut arr[..]);
+	sortable(&mut &mut arr[..]);
+	// owned
+	sortable(vec);
+	sortable(arr);
 }
 
 // std-library bug: https://github.com/rust-lang/rust/issues/34683
@@ -200,5 +330,4 @@ fn binary_search_lifetime() {
     ];
 
     let _r = xs.ord_subset_binary_search_by_key(&2., |entry| entry.property);
-    //println!("{:?}", r.map(|i| (i, &xs[i])));
 }

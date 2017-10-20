@@ -37,8 +37,10 @@ pub trait OrdSubsetSliceExt<T> {
 	///
 	/// Panics when `a.partial_cmp(b)` returns `None` for two values `a`,`b` inside the total order (Violated OrdSubset contract).
 	#[cfg(feature="std")]
-	fn ord_subset_sort(&mut self) where T: OrdSubset;
-
+	fn ord_subset_sort(&mut self)
+		where Self: AsMut<[T]>,
+			  T: OrdSubset;
+		      
 	/// **UNSTABLE** Will likely remove these. Easily recreated by `.sort_by()`
 	///
 	/// Sort the slice in reverse order. Values outside the ordered subset are put at the end in their original order (i.e. not reversed).
@@ -47,7 +49,9 @@ pub trait OrdSubsetSliceExt<T> {
 	///
 	/// Panics when `a.partial_cmp(b)` returns `None` for two values `a`,`b` inside the total order (Violated OrdSubset contract).
 	#[cfg(feature="std")]
-	fn ord_subset_sort_rev(&mut self) where T: OrdSubset;
+	fn ord_subset_sort_rev(&mut self)
+		where Self: AsMut<[T]>,
+			  T: OrdSubset;
 
 	/// Sorts the slice, using `compare` to order elements. Values outside the total order are put at the end in their original order.
 	/// `compare` will not be called on them. If you wish to handle these yourself, use the regular `.sort_by()`.
@@ -63,7 +67,8 @@ pub trait OrdSubsetSliceExt<T> {
 	/// Panics when `a.partial_cmp(b)` returns `None` for two values `a`,`b` inside the total order (Violated OrdSubset contract).
 	#[cfg(feature="std")]
 	fn ord_subset_sort_by<F>(&mut self, compare: F)
-		where T: OrdSubset,
+		where Self: AsMut<[T]>,
+		      T: OrdSubset,
 		      F: FnMut(&T, &T) -> Ordering;
 
 	/// Sorts the slice, using `key` to extract a key by which to order the sort by. Entries mapping to values outside
@@ -73,7 +78,8 @@ pub trait OrdSubsetSliceExt<T> {
 	/// time and space complexity of the current implementation.
 	#[cfg(feature="std")]
 	fn ord_subset_sort_by_key<B, F>(&mut self, f: F)
-		where B: OrdSubset,
+		where Self: AsMut<[T]>,
+		      B: OrdSubset,
 		      F: FnMut(&T) -> B;
 
 	/// Sort the slice. Values outside the ordered subset are put at the end.
@@ -83,7 +89,9 @@ pub trait OrdSubsetSliceExt<T> {
 	/// # Panics
 	///
 	/// Panics when `a.partial_cmp(b)` returns `None` for two values `a`,`b` inside the total order (Violated OrdSubset contract).
-	fn ord_subset_sort_unstable(&mut self) where T: OrdSubset;
+	fn ord_subset_sort_unstable(&mut self)
+		where Self: AsMut<[T]>,
+		      T: OrdSubset;
 	
 	/// **UNSTABLE** Will likely remove these. Easily recreated by `.sort_by()`
 	///
@@ -92,7 +100,9 @@ pub trait OrdSubsetSliceExt<T> {
 	/// # Panics
 	///
 	/// Panics when `a.partial_cmp(b)` returns `None` for two values `a`,`b` inside the total order (Violated OrdSubset contract).
-	fn ord_subset_sort_unstable_rev(&mut self) where T: OrdSubset;
+	fn ord_subset_sort_unstable_rev(&mut self)
+		where Self: AsMut<[T]>,
+		      T: OrdSubset;
 
 	/// Sorts the slice, using `compare` to order elements. Values outside the total order are put at the end.
 	/// `compare` will not be called on them. If you wish to handle these yourself, use the regular `.sort_unstable_by()`.
@@ -107,7 +117,8 @@ pub trait OrdSubsetSliceExt<T> {
 	///
 	/// Panics when `a.partial_cmp(b)` returns `None` for two values `a`,`b` inside the total order (Violated OrdSubset contract).
 	fn ord_subset_sort_unstable_by<F>(&mut self, compare: F)
-		where T: OrdSubset,
+		where Self: AsMut<[T]>,
+		      T: OrdSubset,
 		      F: FnMut(&T, &T) -> Ordering;
 
 	/// Sorts the slice, using `key` to extract a key by which to order the sort by. Entries mapping to values outside
@@ -116,7 +127,8 @@ pub trait OrdSubsetSliceExt<T> {
 	/// This delegates to `.sort_by_unstable()` in the std library. See [official docs](https://doc.rust-lang.org/std/primitive.slice.html#method.sort_by_unstable) for
 	/// time and space complexity of the current implementation.
 	fn ord_subset_sort_unstable_by_key<B, F>(&mut self, f: F)
-		where B: OrdSubset,
+		where Self: AsMut<[T]>,
+		      B: OrdSubset,
 		      F: FnMut(&T) -> B;
 
 	/// Binary search a sorted slice for a given element. Values outside the ordered subset need to be at the end of the slice.
@@ -178,14 +190,14 @@ pub trait OrdSubsetSliceExt<T> {
 	fn ord_subset_binary_search_rev(&self, x: &T) -> Result<usize, usize> where T: OrdSubset;
 }
 
-//impl<T> OrdSubsetSliceExt<T> for [T]
 impl<T, U> OrdSubsetSliceExt<T> for U
-	where U: AsRef<[T]> + AsMut<[T]>,
+	where U: AsRef<[T]>,
 {
 	#[cfg(feature="std")]
 	#[inline]
 	fn ord_subset_sort(&mut self)
-		where T: OrdSubset,
+		where U: AsMut<[T]>,
+		      T: OrdSubset,
 	{
 		self.as_mut().ord_subset_sort_by(|a,b| a.cmp_unwrap(b))
 	}
@@ -193,7 +205,8 @@ impl<T, U> OrdSubsetSliceExt<T> for U
 	#[cfg(feature="std")]
 	#[inline]
 	fn ord_subset_sort_by<F>(&mut self, mut compare: F)
-		where T: OrdSubset,
+		where U: AsMut<[T]>,
+		      T: OrdSubset,
 		      F: FnMut(&T, &T) -> Ordering
 	{
 		self.as_mut().sort_by(|a, b|
@@ -204,7 +217,8 @@ impl<T, U> OrdSubsetSliceExt<T> for U
 	#[cfg(feature="std")]
 	#[inline]
 	fn ord_subset_sort_rev(&mut self)
-		where T: OrdSubset,
+		where U: AsMut<[T]>,
+		      T: OrdSubset,
 	{
 		self.as_mut().ord_subset_sort_by(|a,b| b.cmp_unwrap(a))
 	}
@@ -212,7 +226,8 @@ impl<T, U> OrdSubsetSliceExt<T> for U
 	#[cfg(feature="std")]
 	#[inline]
 	fn ord_subset_sort_by_key<B, F>(&mut self, mut f: F)
-		where B: OrdSubset,
+		where U: AsMut<[T]>,
+		      B: OrdSubset,
 		      F: FnMut(&T) -> B
 	{
 		self.as_mut().sort_by(|a, b| cmp_unordered_greater_all(&(f(a)), &(f(b)), CmpUnwrap::cmp_unwrap))
@@ -220,14 +235,16 @@ impl<T, U> OrdSubsetSliceExt<T> for U
 
 	#[inline]
 	fn ord_subset_sort_unstable(&mut self)
-		where T: OrdSubset,
+		where U: AsMut<[T]>,
+		      T: OrdSubset,
 	{
 		self.as_mut().ord_subset_sort_unstable_by(|a,b| a.cmp_unwrap(b))
 	}
 
 	#[inline]
 	fn ord_subset_sort_unstable_by<F>(&mut self, mut compare: F)
-		where T: OrdSubset,
+		where U: AsMut<[T]>,
+		      T: OrdSubset,
 		      F: FnMut(&T, &T) -> Ordering
 	{
 		self.as_mut().sort_unstable_by(|a, b|
@@ -237,14 +254,16 @@ impl<T, U> OrdSubsetSliceExt<T> for U
 
 	#[inline]
 	fn ord_subset_sort_unstable_rev(&mut self)
-		where T: OrdSubset,
+		where U: AsMut<[T]>,
+		      T: OrdSubset,
 	{
 		self.as_mut().ord_subset_sort_unstable_by(|a,b| b.cmp_unwrap(a))
 	}
 
 	#[inline]
 	fn ord_subset_sort_unstable_by_key<B, F>(&mut self, mut f: F)
-		where B: OrdSubset,
+		where U: AsMut<[T]>,
+		      B: OrdSubset,
 		      F: FnMut(&T) -> B
 	{
 		self.as_mut().sort_unstable_by(|a, b| cmp_unordered_greater_all(&(f(a)), &(f(b)), CmpUnwrap::cmp_unwrap))

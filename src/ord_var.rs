@@ -25,6 +25,7 @@ impl<T: PartialOrd + PartialEq> OrdVar<T> {
 	/// # Panics
 	///
 	/// Panics if the argument is outside of the total order.
+	#[inline]
 	pub fn new(data: T)	-> OrdVar<T>
 		where T: Debug + OrdSubset
 	{
@@ -33,6 +34,7 @@ impl<T: PartialOrd + PartialEq> OrdVar<T> {
 	}
 
 	/// Constructs an ```Option<OrdVar>``` out of the argument. Returns None if the argument is outside the total order.
+	#[inline]
 	pub fn new_checked(data: T)	-> Option<OrdVar<T>>
 		where T: OrdSubset,
 	{
@@ -44,10 +46,12 @@ impl<T: PartialOrd + PartialEq> OrdVar<T> {
 
 	/// Constructs an `OrdVar` without validity check. Incorrectly constructed `OrdVar`s may panic on calls to `.cmp()`.
 	/// The comparison operators (`>`, `>=`, `=`, `!=`, `<`, `<=`) will not panic but may result in surprising behaviour.
+	#[inline(always)]
 	pub fn new_unchecked(data: T) -> OrdVar<T> {
 		OrdVar(data)
 	}
 
+	#[inline(always)]
 	pub fn into_inner(self) -> T {
 		self.0
 	}
@@ -56,6 +60,7 @@ impl<T: PartialOrd + PartialEq> OrdVar<T> {
 impl<T: PartialOrd + PartialEq> Eq for OrdVar<T> {}
 
 impl<T: PartialOrd + PartialEq> Ord for OrdVar<T> {
+	#[inline]
 	fn cmp(&self, other: &Self) -> Ordering {
 		self.partial_cmp(other).expect("OrdVar contains value outside total order")
 	}
@@ -64,6 +69,7 @@ impl<T: PartialOrd + PartialEq> Ord for OrdVar<T> {
 impl<T: PartialOrd + PartialEq> Deref for OrdVar<T> {
 	type Target = T;
 
+	#[inline(always)]
 	fn deref(&self) -> &Self::Target {
 		&self.0
 	}

@@ -14,12 +14,14 @@ pub trait OrdSubset: PartialOrd<Self> + PartialEq<Self> {
 }
 
 impl<'a, A> OrdSubset for &'a A where A: OrdSubset {
+	#[inline(always)]
 	fn is_outside_order(&self) -> bool {
 		(*self).is_outside_order()
 	}
 }
 
 impl<'a, A> OrdSubset for &'a mut A where A: OrdSubset {
+	#[inline(always)]
 	fn is_outside_order(&self) -> bool {
 		(**self).is_outside_order()
 	}
@@ -30,6 +32,7 @@ use core::num::Float;
 
 #[cfg(any(feature="std", feature="unstable"))]
 impl OrdSubset for f64 {
+	#[inline(always)]
 	fn is_outside_order(&self) -> bool {
 		#[cfg(feature="std")]
 		{
@@ -44,6 +47,7 @@ impl OrdSubset for f64 {
 
 #[cfg(any(feature="std", feature="unstable"))]
 impl OrdSubset for f32 {
+	#[inline(always)]
 	fn is_outside_order(&self) -> bool {
 		#[cfg(feature="std")]
 		{
@@ -58,6 +62,7 @@ impl OrdSubset for f32 {
 
 // Small helper used a lot in sorts
 pub(crate) trait CmpUnwrap: OrdSubset {
+	#[inline(always)]
 	fn cmp_unwrap(&self, other: &Self) -> ::core::cmp::Ordering {
 		self.partial_cmp(other).expect("Violated OrdSubset contract: a.partial_cmp(b) == None for a,b inside total order")
 	}

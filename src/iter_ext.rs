@@ -16,7 +16,7 @@ pub trait OrdSubsetIterExt: Iterator
 	/// Consumes the entire iterator to return the maximum element.
 	/// Values outside the ordered subset as given by `.is_outside_order()` are ignored.
 	///
-	/// Returns the leftmost element if the comparison determines two elements to be equally maximum.
+	/// Returns the last element if the comparison determines multiple elements to be equally maximum.
 	///
 	/// # Example
 	///
@@ -27,6 +27,7 @@ pub trait OrdSubsetIterExt: Iterator
 	/// let max = vec.iter().ord_subset_max().unwrap();
 	/// assert_eq!(&5.0, max);
 	/// ```
+	#[inline]
 	fn ord_subset_max(self) -> Option<Self::Item>
 		where Self: Sized,
 		      Self::Item: OrdSubset
@@ -39,7 +40,7 @@ pub trait OrdSubsetIterExt: Iterator
 	/// Consumes the entire iterator to return the minimum element.
 	/// Values outside the ordered subset as given by `.is_outside_order()` are ignored.
 	///
-	/// Returns the leftmost element if the comparison determines two elements to be equally minimum.
+	/// Returns the first element if the comparison determines multiple elements to be equally minimum.
 	///
 	/// # Example
 	///
@@ -50,6 +51,7 @@ pub trait OrdSubsetIterExt: Iterator
 	/// let min = vec.iter().ord_subset_min().unwrap();
 	/// assert_eq!(&2.0, min);
 	/// ```
+	#[inline]
 	fn ord_subset_min(self) -> Option<Self::Item>
 		where Self: Sized,
 		      Self::Item: OrdSubset
@@ -62,7 +64,7 @@ pub trait OrdSubsetIterExt: Iterator
 	/// Returns the element that gives the minimum value from the specified function.
 	/// Values outside the ordered subset as given by `.is_outside_order()` on the mapped value are ignored.
 	///
-	/// Returns the rightmost element if the comparison determines two elements to be equally minimum.
+	/// Returns the first element if the comparison determines multiple elements to be equally minimum.
 	///
 	/// # Example
 	///
@@ -76,6 +78,7 @@ pub trait OrdSubsetIterExt: Iterator
 	/// 	assert_eq!(&5.0, min_by);
 	/// }
 	/// ```
+	#[inline]
 	fn ord_subset_min_by_key<F, B>(self, mut f: F) -> Option<Self::Item>
 		where F: FnMut(&Self::Item) -> B,
 			  B: OrdSubset,
@@ -88,7 +91,8 @@ pub trait OrdSubsetIterExt: Iterator
 	/// Returns the element that gives the maximum value from the specified function.
 	/// Values outside the ordered subset as given by `.is_outside_order()` on the mapped value are ignored.
 	///
-	/// Returns the rightmost element if the comparison determines two elements to be equally maximum.
+	/// Returns the last element if the comparison determines multiple elements to be equally maximum.
+	#[inline]
 	fn ord_subset_max_by_key<F, B>(self, mut f: F) -> Option<Self::Item>
 		where F: FnMut(&Self::Item) -> B,
 		      B: OrdSubset,

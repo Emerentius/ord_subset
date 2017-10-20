@@ -13,6 +13,7 @@ use core::cmp::Ordering::{self, Equal, Greater, Less};
 pub struct RevOption<T>(pub Option<T>);
 
 impl<T: PartialOrd> PartialOrd<RevOption<T>> for RevOption<T> {
+	#[inline]
 	fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
 		match (self.0.is_none(), other.0.is_none()) {
 			(true, false) => Some(Greater),
@@ -24,6 +25,7 @@ impl<T: PartialOrd> PartialOrd<RevOption<T>> for RevOption<T> {
 }
 
 impl<T: Ord> Ord for RevOption<T> {
+	#[inline]
 	fn cmp(&self, other: &Self) -> Ordering {
 		match (self.0.is_none(), other.0.is_none()) {
 			(true, false) => Greater,

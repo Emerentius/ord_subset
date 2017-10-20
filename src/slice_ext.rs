@@ -12,6 +12,7 @@ static ERROR_BINARY_SEARCH_EXPECT: &str = "Unexpected None for a.partial_cmp(b),
 
 // Wrapper for comparison functions
 // Treats unordered values as greater than any ordered
+#[inline]
 fn cmp_unordered_greater_all<T: OrdSubset, F>(a: &T, b: &T, mut compare: F) -> Ordering
 	where F: FnMut(&T, &T) -> Ordering,
 {
@@ -182,6 +183,7 @@ impl<T, U> OrdSubsetSliceExt<T> for U
 	where U: AsRef<[T]> + AsMut<[T]>,
 {
 	#[cfg(feature="std")]
+	#[inline]
 	fn ord_subset_sort(&mut self)
 		where T: OrdSubset,
 	{
@@ -189,6 +191,7 @@ impl<T, U> OrdSubsetSliceExt<T> for U
 	}
 
 	#[cfg(feature="std")]
+	#[inline]
 	fn ord_subset_sort_by<F>(&mut self, mut compare: F)
 		where T: OrdSubset,
 		      F: FnMut(&T, &T) -> Ordering
@@ -199,6 +202,7 @@ impl<T, U> OrdSubsetSliceExt<T> for U
 	}
 
 	#[cfg(feature="std")]
+	#[inline]
 	fn ord_subset_sort_rev(&mut self)
 		where T: OrdSubset,
 	{
@@ -206,6 +210,7 @@ impl<T, U> OrdSubsetSliceExt<T> for U
 	}
 
 	#[cfg(feature="std")]
+	#[inline]
 	fn ord_subset_sort_by_key<B, F>(&mut self, mut f: F)
 		where B: OrdSubset,
 		      F: FnMut(&T) -> B
@@ -213,12 +218,14 @@ impl<T, U> OrdSubsetSliceExt<T> for U
 		self.as_mut().sort_by(|a, b| cmp_unordered_greater_all(&(f(a)), &(f(b)), CmpUnwrap::cmp_unwrap))
 	}
 
+	#[inline]
 	fn ord_subset_sort_unstable(&mut self)
 		where T: OrdSubset,
 	{
 		self.as_mut().ord_subset_sort_unstable_by(|a,b| a.cmp_unwrap(b))
 	}
 
+	#[inline]
 	fn ord_subset_sort_unstable_by<F>(&mut self, mut compare: F)
 		where T: OrdSubset,
 		      F: FnMut(&T, &T) -> Ordering
@@ -227,12 +234,15 @@ impl<T, U> OrdSubsetSliceExt<T> for U
 			cmp_unordered_greater_all(a, b, &mut compare)
 		)
 	}
+
+	#[inline]
 	fn ord_subset_sort_unstable_rev(&mut self)
 		where T: OrdSubset,
 	{
 		self.as_mut().ord_subset_sort_unstable_by(|a,b| b.cmp_unwrap(a))
 	}
 
+	#[inline]
 	fn ord_subset_sort_unstable_by_key<B, F>(&mut self, mut f: F)
 		where B: OrdSubset,
 		      F: FnMut(&T) -> B
@@ -240,6 +250,7 @@ impl<T, U> OrdSubsetSliceExt<T> for U
 		self.as_mut().sort_unstable_by(|a, b| cmp_unordered_greater_all(&(f(a)), &(f(b)), CmpUnwrap::cmp_unwrap))
 	}
 
+	#[inline]
 	fn ord_subset_binary_search(&self, x: &T) -> Result<usize, usize>
 		where T: OrdSubset,
 	{
@@ -249,6 +260,7 @@ impl<T, U> OrdSubsetSliceExt<T> for U
 		})
 	}
 
+	#[inline]
 	fn ord_subset_binary_search_by<F>(&self, mut f: F) -> Result<usize, usize>
 		where T: OrdSubset,
 		      F: FnMut(&T) -> Ordering
@@ -261,6 +273,7 @@ impl<T, U> OrdSubsetSliceExt<T> for U
 		})
 	}
 
+	#[inline]
 	fn ord_subset_binary_search_by_key<B, F>(&self, b: &B, mut f: F) -> Result<usize, usize>
 		where B: OrdSubset,
 		      F: FnMut(&T) -> B
@@ -275,6 +288,7 @@ impl<T, U> OrdSubsetSliceExt<T> for U
 		self.as_ref().binary_search_by(|k| cmp_unordered_greater_all(&f(k), b, &cmp_ord))
 	}
 
+	#[inline]
 	fn ord_subset_binary_search_rev(&self, x: &T) -> Result<usize, usize>
 		where T: OrdSubset,
 	{

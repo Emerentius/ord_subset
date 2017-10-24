@@ -409,3 +409,13 @@ fn binary_search_lifetime() {
 
     let _r = xs.ord_subset_binary_search_by_key(&2., |entry| entry.property);
 }
+
+#[cfg(ops)]
+fn ops_impl_test() {
+	let mut float = OrdVar::new(1.0);
+	float += float;
+	float -= float;
+	float *= float;
+	float /= float;
+	float %= float;
+}

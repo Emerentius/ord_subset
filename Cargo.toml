@@ -21,3 +21,10 @@ std = []
 # Currently this is the Float trait in core which defines .is_nan()
 # Necessary for default OrdSubset implementations for f32, f64
 unstable = []
+
+# Forward core::ops implementations of T to OrdVar<T>
+# all results are checked to be ordered by default
+ops = []
+
+# Deactivate Ord checks for the result of overloaded ops
+unchecked_ops = ["ops"]

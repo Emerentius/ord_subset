@@ -82,6 +82,13 @@ impl<T: PartialOrd + PartialEq> AsRef<T> for OrdVar<T> {
 	}
 }
 
+impl<T: Default + OrdSubset + Debug>  Default for OrdVar<T> {
+	#[inline(always)]
+	fn default() -> Self {
+		OrdVar::new(T::default())
+	}
+}
+
 #[cfg(ops)]
 mod ops {
 	// would love to be able to macro these away somehow

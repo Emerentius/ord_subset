@@ -17,9 +17,8 @@ default = ["std"]
 # Provides ord_subset_* versions of allocating sorts on slices
 std = []
 
-# Provides access to features dependent on unstable functionality
-# Currently this is the Float trait in core which defines .is_nan()
-# Necessary for default OrdSubset implementations for f32, f64
+# Currently does nothing
+# Provides in principle access to features dependent on unstable functionality
 unstable = []
 
 # Forward core::ops implementations of T to OrdVar<T>

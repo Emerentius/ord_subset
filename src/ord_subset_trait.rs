@@ -27,36 +27,19 @@ impl<'a, A> OrdSubset for &'a mut A where A: OrdSubset {
 	}
 }
 
-#[cfg(all(feature="unstable", not(feature="std")))]
-use core::num::Float;
-
-#[cfg(any(feature="std", feature="unstable"))]
 impl OrdSubset for f64 {
 	#[inline(always)]
 	fn is_outside_order(&self) -> bool {
-		#[cfg(feature="std")]
-		{
-			(*self).is_nan()
-		}
-		#[cfg(all(feature="unstable", not(feature="std")))]
-		{
-			Float::is_nan(*self)
-		}
+		// only NaNs != itself
+		*self != *self
 	}
 }
 
-#[cfg(any(feature="std", feature="unstable"))]
 impl OrdSubset for f32 {
 	#[inline(always)]
 	fn is_outside_order(&self) -> bool {
-		#[cfg(feature="std")]
-		{
-			(*self).is_nan()
-		}
-		#[cfg(all(feature="unstable", not(feature="std")))]
-		{
-			Float::is_nan(*self)
-		}
+		// only NaNs != itself
+		*self != *self
 	}
 }
 

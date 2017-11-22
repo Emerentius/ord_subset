@@ -261,7 +261,7 @@ fn ord_subset_slice_ext_impl_test() {
 		as_slice.ord_subset_binary_search_by_key(element, |_| element.clone());
 		as_slice.ord_subset_binary_search_by(|_| std::cmp::Ordering::Equal);
 	}
-	
+
 	let mut vec: Vec<OrdSub> = vec![];
 	let mut arr: [OrdSub; 0] = [];
 
@@ -290,7 +290,7 @@ fn ord_subset_slice_ext_impl_test() {
 // check that mutable vecs, arrays and slices are all sortable
 #[allow(unused)]
 fn ord_subset_mut_slice_ext_impl_test() {
-	fn sortable<T, U>(mut as_slice: T) 
+	fn sortable<T, U>(mut as_slice: T)
 		where T: OrdSubsetSliceExt<U> + AsMut<[U]>,
 		      U: OrdSubset,
 	{
@@ -368,7 +368,7 @@ fn non_ord_subset_slice_ext_impl_test() {
 // check that mutable vecs, arrays and slices of non-OrdSubset types are all sortable by key
 #[allow(unused)]
 fn non_ord_subset_mut_slice_ext_impl_test() {
-	fn sortable<T, U>(mut as_slice: T) 
+	fn sortable<T, U>(mut as_slice: T)
 		where T: OrdSubsetSliceExt<U> + AsMut<[U]>,
 	{
 		let key = OrdSub();
@@ -410,12 +410,77 @@ fn binary_search_lifetime() {
     let _r = xs.ord_subset_binary_search_by_key(&2., |entry| entry.property);
 }
 
-#[cfg(ops)]
-fn ops_impl_test() {
-	let mut float = OrdVar::new(1.0);
-	float += float;
-	float -= float;
-	float *= float;
-	float /= float;
-	float %= float;
+#[cfg(feature="ops")]
+use core::ops::{Add, Sub, Mul, Div, Rem,
+	//BitAnd, BitOr, BitXor, Shl, Shr,
+	Neg, //Not,
+	AddAssign, SubAssign, MulAssign, DivAssign, RemAssign,
+	//BitAndAssign, BitOrAssign, BitXorAssign, ShlAssign, ShrAssign,
+};
+
+#[test]
+#[cfg(feature="ops")]
+fn ops_correctness_test() {
+	let infix_ops = [
+		Add::add, Sub::sub, Mul::mul, Div::div, Rem::rem,
+		//BitAnd::bitand, BitOr::bitor, BitXor::bitxor, Shl::shl, Shr::shr
+	];
+
+	let unary_ops = [
+		Neg::neg,
+		//Not::not
+	];
+	let assign_ops = [
+		AddAssign::add_assign, SubAssign::sub_assign, MulAssign::mul_assign, DivAssign::div_assign, RemAssign::rem_assign,
+		//BitAndAssign::bitand_assign, BitOrAssign::bitor_assign, BitXorAssign::bitxor_assign,
+		//ShlAssign::shl_assign, ShrAssign::shr_assign
+	];
+
+	// same functions but for OrdVar variables
+	let infix_ops_ordvar = [
+		Add::add, Sub::sub, Mul::mul, Div::div, Rem::rem,
+		//BitAnd::bitand, BitOr::bitor, BitXor::bitxor, Shl::shl, Shr::shr
+	];
+
+	let unary_ops_ordvar = [
+		Neg::neg,
+		//Not::not
+	];
+
+	let assign_ops_ordvar = [
+		AddAssign::add_assign, SubAssign::sub_assign, MulAssign::mul_assign, DivAssign::div_assign, RemAssign::rem_assign,
+		//BitAndAssign::bitand_assign, BitOrAssign::bitor_assign, BitXorAssign::bitxor_assign,
+		//ShlAssign::shl_assign, ShrAssign::shr_assign
+	];
+
+	// skip 0, can't divide by it
+	let nums = (-10..0).chain(1..11i32).map(|n| n as f64).collect::<Vec<_>>();
+	let combinations = nums.iter().flat_map(|&n1| nums.iter().map(move |&n2| (n1, n2)));
+
+	for (num1, num2) in combinations {
+		// infix ops
+		for (op, op_ordvar) in infix_ops.iter().zip(infix_ops_ordvar.iter()) {
+			let res = op(num1, num2);
+			let res2 = op_ordvar(OrdVar::new(num1), num2);
+			//let res2 = op_ordvar(num1, num2);
+			assert!(res == res2.into_inner())
+		}
+
+		// unary ops
+		for (op, op_ordvar) in unary_ops.iter().zip(unary_ops_ordvar.iter()) {
+			let res = op(num1);
+			let res2 = op_ordvar(OrdVar::new(num1));
+			//let res2 = op_ordvar(num1, num2);
+			assert!(res == res2.into_inner())
+		}
+
+		// assign ops
+		for (op, op_ordvar) in assign_ops.iter().zip(assign_ops_ordvar.iter()) {
+			let mut num1 = num1;
+			let mut ordvar = OrdVar::new(num1);
+			op(&mut num1, num2);
+			op_ordvar(&mut ordvar, num2);
+			assert!(num1 == ordvar.into_inner())
+		}
+	}
 }

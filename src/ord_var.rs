@@ -89,7 +89,7 @@ impl<T: Default + OrdSubset + Debug>  Default for OrdVar<T> {
 	}
 }
 
-#[cfg(ops)]
+#[cfg(feature="ops")]
 mod ops {
 	// would love to be able to macro these away somehow
 	use core::ops::{Add, Sub, Mul, Div, Rem, BitAnd, BitOr, BitXor, Shl, Shr, Neg, Not,
@@ -99,13 +99,13 @@ mod ops {
 	use super::OrdVar;
 
 	#[inline(always)]
-	fn construct<T: PartialOrd + PartialEq>(t: T) -> OrdVar<T> {
+	fn construct<T: OrdSubset + Debug>(t: T) -> OrdVar<T> {
 		match cfg!(feature = "unchecked_ops") {
 			true => OrdVar::new_unchecked(t),
 			false => OrdVar::new(t),
 		}
 	}
-	
+
 	// -----------------  binary ops -----------------------------------------------
 
 	impl<T, RHS> Add<RHS> for OrdVar<T>

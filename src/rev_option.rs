@@ -36,16 +36,20 @@ impl<T: Ord> Ord for RevOption<T> {
 	}
 }
 
-#[test]
-fn rev_option() {
-	assert!( RevOption(None)   >  RevOption(Some(2)));
-	assert!( RevOption(None)   >= RevOption(Some(2)));
-	assert!( !(RevOption(None) <  RevOption(Some(2))));
-}
+#[cfg(test)]
+mod test {
+	use super::RevOption;
+	#[test]
+	fn rev_option() {
+		assert!( RevOption(None)   >  RevOption(Some(2)));
+		assert!( RevOption(None)   >= RevOption(Some(2)));
+		assert!( !(RevOption(None) <  RevOption(Some(2))));
+	}
 
-#[test]
-fn normal_option() {
-	assert!( None   <  Some(2));
-	assert!( None   <= Some(2));
-	assert!(!( None >  Some(2) ) );
+	#[test]
+	fn normal_option() {
+		assert!( None   <  Some(2));
+		assert!( None   <= Some(2));
+		assert!(!( None >  Some(2) ) );
+	}
 }

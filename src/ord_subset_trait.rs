@@ -47,11 +47,11 @@ trait EnsureOrd: Ord {}
 
 macro_rules! impl_for_ord {
 	($($type:ty),+) => (
-		$(	
+		$(
 			// safe guard against incorrect macro invocation
 			// `where Self: Ord` on OrdSubset impl would be rendered in docs
-			impl EnsureOrd for $type {} 
-			
+			impl EnsureOrd for $type {}
+
 			impl OrdSubset for $type
 			{
 				#[inline(always)]
@@ -63,7 +63,7 @@ macro_rules! impl_for_ord {
 	)
 }
 
-impl_for_ord!(u8, u16, u32, u64, usize, i8, i16, i32, i64, isize, bool, char);
+impl_for_ord!((), u8, u16, u32, u64, usize, i8, i16, i32, i64, isize, bool, char);
 
 macro_rules! array_impls {
     ($($N:expr),+) => {
@@ -90,10 +90,6 @@ impl<T: OrdSubset> OrdSubset for [T] {
 	fn is_outside_order(&self) -> bool {
 		self.iter().any(OrdSubset::is_outside_order)
 	}
-}
-
-impl OrdSubset for () {
-	fn is_outside_order(&self) -> bool { false } // or true, whatever
 }
 
 // code stolen from std library
@@ -233,3 +229,22 @@ pub(crate) trait CmpUnwrap: OrdSubset {
 }
 
 impl<T: OrdSubset> CmpUnwrap for T {}
+
+// The tests here are primarily compile time tests
+// If the tuple macros were wrong, it would show up in the std library
+#[cfg(test)]
+mod test {
+    use super::OrdSubset;
+    #[test]
+    fn heterogenous_tuple() {
+        let tup = ((), 0u8, 0u16, 0u32, 0u64, 0usize, 0i8, 0i16, 0i32, 0i64, 0isize, 'a');
+        assert!( ! tup.is_outside_order() );
+    }
+
+    #[test]
+    fn slice() {
+        let a = [0u8; 32];
+        assert!( ! a.is_outside_order() );
+        assert!( ! a.as_ref().is_outside_order() );
+    }
+}

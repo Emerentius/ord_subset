@@ -1,6 +1,6 @@
 [package]
 name = "ord_subset"
-version = "3.0.0"
+version = "3.1.0"
 authors = ["Emerentius"]
 
 license = "MIT/Apache-2.0"
@@ -22,8 +22,12 @@ std = []
 unstable = []
 
 # Forward core::ops implementations of T to OrdVar<T>
+# e.g. impl Add<U> for OrdVar<T> where T: Add<U>
 # all results are checked to be ordered by default
+# Does not yet allow OrdVar<T> `op` OrdVar<U> unless T: Add<OrdVar<U>>
 ops = []
 
 # Deactivate Ord checks for the result of overloaded ops
+# Because this is not a purely additive feature, it may cause
+# interoperability issues with other crates
 unchecked_ops = ["ops"]

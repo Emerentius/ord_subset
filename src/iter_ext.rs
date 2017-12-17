@@ -6,8 +6,6 @@
 
 use ord_subset_trait::*;
 use ord_var::*;
-// for min_by
-use rev_option::*;
 
 /////////////////////////////////////////////////////////////////////
 pub trait OrdSubsetIterExt: Iterator
@@ -84,8 +82,8 @@ pub trait OrdSubsetIterExt: Iterator
 			  B: OrdSubset,
 			  Self: Sized
 	{
-		// None < Some, always
-		self.min_by_key(|it| RevOption(OrdVar::new_checked(f(it))))
+		// Ok < Err, always
+		self.min_by_key(|it| OrdVar::new_checked(f(it)).ok_or(()))
 	}
 
 	/// Returns the element that gives the maximum value from the specified function.

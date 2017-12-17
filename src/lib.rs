@@ -39,16 +39,12 @@
 //! option. This file may not be copied, modified, or distributed
 //! except according to those terms.
 //#![cfg_attr(feature="unstable", unstable)]
-#![cfg_attr(feature="unstable", feature(core_float))]
-
 #![cfg_attr(not(feature = "std"), no_std)]
 #[cfg(feature="std")] // attribute not necessary, but rls warns without
 extern crate core;
 
 mod iter_ext;
 mod ord_var;
-// for ord_subset_min_by()
-mod rev_option;
 mod slice_ext;
 mod ord_subset_trait;
 

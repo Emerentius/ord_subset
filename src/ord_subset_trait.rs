@@ -27,6 +27,7 @@ impl<'a, A> OrdSubset for &'a mut A where A: OrdSubset {
 	}
 }
 
+#[cfg_attr(feature = "cargo-clippy", allow(float_cmp, eq_op))]
 impl OrdSubset for f64 {
 	#[inline(always)]
 	fn is_outside_order(&self) -> bool {
@@ -35,6 +36,7 @@ impl OrdSubset for f64 {
 	}
 }
 
+#[cfg_attr(feature = "cargo-clippy", allow(float_cmp, eq_op))]
 impl OrdSubset for f32 {
 	#[inline(always)]
 	fn is_outside_order(&self) -> bool {

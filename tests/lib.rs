@@ -1,3 +1,4 @@
+#![cfg_attr(feature = "cargo-clippy", allow(float_cmp, match_wild_err_arm))]
 extern crate ord_subset;
 extern crate core;
 use ord_subset::OrdSubsetIterExt;
@@ -162,7 +163,7 @@ fn sort_unstable_by_key() {
 fn binary_search() {
 	let array = SORTED_TEST_ARRAY;
 	for (i, num) in array.iter().enumerate().take(N_NO_NAN) {
-		assert_eq!(array.ord_subset_binary_search(&num), Ok(i));
+		assert_eq!(array.ord_subset_binary_search(num), Ok(i));
 	}
 }
 
@@ -171,7 +172,7 @@ fn binary_search_rev() {
 	let mut array = TEST_ARRAY;
 	array.ord_subset_sort_unstable_rev();
 	for (i, num) in array.iter().enumerate().take(N_NO_NAN) {
-		assert_eq!(array.ord_subset_binary_search_rev(&num), Ok(i));
+		assert_eq!(array.ord_subset_binary_search_rev(num), Ok(i));
 	}
 }
 

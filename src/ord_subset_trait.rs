@@ -10,39 +10,45 @@
 ///
 /// `std::cmp::PartialOrd::partial_cmp(a,b)` must return `Some(_)` if a,b are both inside order and `None` if only one is outside order. Return value for two variables outside order is undefined.
 pub trait OrdSubset: PartialOrd<Self> + PartialEq<Self> {
-	fn is_outside_order(&self) -> bool;
+    fn is_outside_order(&self) -> bool;
 }
 
-impl<'a, A> OrdSubset for &'a A where A: OrdSubset {
-	#[inline(always)]
-	fn is_outside_order(&self) -> bool {
-		(**self).is_outside_order()
-	}
+impl<'a, A> OrdSubset for &'a A
+where
+    A: OrdSubset,
+{
+    #[inline(always)]
+    fn is_outside_order(&self) -> bool {
+        (**self).is_outside_order()
+    }
 }
 
-impl<'a, A> OrdSubset for &'a mut A where A: OrdSubset {
-	#[inline(always)]
-	fn is_outside_order(&self) -> bool {
-		(**self).is_outside_order()
-	}
+impl<'a, A> OrdSubset for &'a mut A
+where
+    A: OrdSubset,
+{
+    #[inline(always)]
+    fn is_outside_order(&self) -> bool {
+        (**self).is_outside_order()
+    }
 }
 
 #[cfg_attr(feature = "cargo-clippy", allow(float_cmp, eq_op))]
 impl OrdSubset for f64 {
-	#[inline(always)]
-	fn is_outside_order(&self) -> bool {
-		// only NaNs != itself
-		*self != *self
-	}
+    #[inline(always)]
+    fn is_outside_order(&self) -> bool {
+        // only NaNs != itself
+        *self != *self
+    }
 }
 
 #[cfg_attr(feature = "cargo-clippy", allow(float_cmp, eq_op))]
 impl OrdSubset for f32 {
-	#[inline(always)]
-	fn is_outside_order(&self) -> bool {
-		// only NaNs != itself
-		*self != *self
-	}
+    #[inline(always)]
+    fn is_outside_order(&self) -> bool {
+        // only NaNs != itself
+        *self != *self
+    }
 }
 
 trait EnsureOrd: Ord {}
@@ -65,6 +71,7 @@ macro_rules! impl_for_ord {
 	)
 }
 
+#[cfg_attr(rustfmt, rustfmt_skip)]
 impl_for_ord!((), u8, u16, u32, u64, usize, i8, i16, i32, i64, isize, bool, char);
 
 macro_rules! array_impls {
@@ -80,6 +87,7 @@ macro_rules! array_impls {
     }
 }
 
+#[cfg_attr(rustfmt, rustfmt_skip)]
 array_impls!(
 	0, 1, 2, 3, 4, 5, 6, 7, 8,
 	9, 10, 11, 12, 13, 14, 15, 16,
@@ -88,10 +96,10 @@ array_impls!(
 );
 
 impl<T: OrdSubset> OrdSubset for [T] {
-	#[inline(always)]
-	fn is_outside_order(&self) -> bool {
-		self.iter().any(OrdSubset::is_outside_order)
-	}
+    #[inline(always)]
+    fn is_outside_order(&self) -> bool {
+        self.iter().any(OrdSubset::is_outside_order)
+    }
 }
 
 // code stolen from std library
@@ -224,10 +232,12 @@ tuple_impls! {
 
 // Small helper used a lot in sorts
 pub(crate) trait CmpUnwrap: OrdSubset {
-	#[inline(always)]
-	fn cmp_unwrap(&self, other: &Self) -> ::core::cmp::Ordering {
-		self.partial_cmp(other).expect("Violated OrdSubset contract: a.partial_cmp(b) == None for a,b inside total order")
-	}
+    #[inline(always)]
+    fn cmp_unwrap(&self, other: &Self) -> ::core::cmp::Ordering {
+        self.partial_cmp(other).expect(
+            "Violated OrdSubset contract: a.partial_cmp(b) == None for a,b inside total order",
+        )
+    }
 }
 
 impl<T: OrdSubset> CmpUnwrap for T {}
@@ -239,11 +249,13 @@ mod test {
     use super::OrdSubset;
     #[test]
     fn heterogenous_tuple() {
+        #[cfg_attr(rustfmt, rustfmt_skip)]
         let tup = ((), 0u8, 0u16, 0u32, 0u64, 0usize, 0i8, 0i16, 0i32, 0i64, 0isize, 'a');
-        assert!( ! tup.is_outside_order() );
+        assert!(!tup.is_outside_order());
     }
 
     #[test]
+    #[cfg_attr(rustfmt, rustfmt_skip)]
     fn slice() {
         let a = [0u8; 32];
         assert!( ! a.is_outside_order() );

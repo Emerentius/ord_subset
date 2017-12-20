@@ -41,7 +41,7 @@
 //! except according to those terms.
 //#![cfg_attr(feature="unstable", unstable)]
 #![cfg_attr(not(feature = "std"), no_std)]
-#[cfg(feature="std")] // attribute not necessary, but rls warns without
+#[cfg(feature = "std")] // attribute not necessary, but rls warns without
 extern crate core;
 
 mod iter_ext;

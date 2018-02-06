@@ -72,7 +72,151 @@ macro_rules! impl_for_ord {
 }
 
 #[cfg_attr(rustfmt, rustfmt_skip)]
-impl_for_ord!((), u8, u16, u32, u64, usize, i8, i16, i32, i64, isize, bool, char);
+impl_for_ord!((), u8, u16, u32, u64, usize, i8, i16, i32, i64, isize, bool, char,
+    ::core::fmt::Error, ::core::cmp::Ordering, ::core::any::TypeId);
+
+#[cfg(feature = "std")]
+impl_for_ord!(
+    String, ::std::ffi::CString, ::std::ffi::CStr, ::std::ffi::OsString, ::std::ffi::OsStr,
+    ::std::time::SystemTime, ::std::time::Instant, ::std::time::Duration, ::std::path::Path,
+    ::std::path::PathBuf, ::std::net::Ipv6Addr, ::std::net::Ipv4Addr, ::std::net::IpAddr,
+    ::std::io::ErrorKind
+);
+
+impl<T: ?Sized> OrdSubset for ::core::marker::PhantomData<T> {
+    #[inline(always)]
+    fn is_outside_order(&self) -> bool {
+        false
+    }
+}
+
+impl<T: ?Sized> OrdSubset for *mut T {
+    #[inline(always)]
+    fn is_outside_order(&self) -> bool {
+        false
+    }
+}
+
+impl<T: ?Sized> OrdSubset for *const T {
+    #[inline(always)]
+    fn is_outside_order(&self) -> bool {
+        false
+    }
+}
+
+impl<T: OrdSubset> OrdSubset for ::core::cmp::Reverse<T> {
+    #[inline(always)]
+    fn is_outside_order(&self) -> bool {
+        self.0.is_outside_order()
+    }
+}
+
+impl<T: OrdSubset> OrdSubset for Option<T> {
+    #[inline(always)]
+    fn is_outside_order(&self) -> bool {
+        self.as_ref().map_or(false, OrdSubset::is_outside_order)
+    }
+}
+
+impl<T: OrdSubset + Copy> OrdSubset for ::core::cell::Cell<T> {
+    #[inline(always)]
+    fn is_outside_order(&self) -> bool {
+        self.get().is_outside_order()
+    }
+}
+
+impl<T: OrdSubset + ?Sized> OrdSubset for ::core::cell::RefCell<T> {
+    #[inline(always)]
+    fn is_outside_order(&self) -> bool {
+        self.borrow().is_outside_order()
+    }
+}
+
+impl<T: OrdSubset> OrdSubset for ::core::mem::ManuallyDrop<T> {
+    #[inline(always)]
+    fn is_outside_order(&self) -> bool {
+        (**self).is_outside_order()
+    }
+}
+
+impl<T: OrdSubset> OrdSubset for ::core::num::Wrapping<T> {
+    #[inline(always)]
+    fn is_outside_order(&self) -> bool {
+        self.0.is_outside_order()
+    }
+}
+
+#[cfg(feature = "std")]
+impl<T: OrdSubset> OrdSubset for Vec<T> {
+    #[inline(always)]
+    fn is_outside_order(&self) -> bool {
+        self.iter().any(OrdSubset::is_outside_order)
+    }
+}
+
+#[cfg(feature = "std")]
+impl<T: OrdSubset + ?Sized> OrdSubset for Box<T> {
+    #[inline(always)]
+    fn is_outside_order(&self) -> bool {
+        (**self).is_outside_order()
+    }
+}
+
+#[cfg(feature = "std")]
+impl<T: OrdSubset + ?Sized> OrdSubset for ::std::sync::Arc<T> {
+    #[inline(always)]
+    fn is_outside_order(&self) -> bool {
+        (**self).is_outside_order()
+    }
+}
+
+#[cfg(feature = "std")]
+impl<T: OrdSubset + ?Sized> OrdSubset for ::std::rc::Rc<T> {
+    #[inline(always)]
+    fn is_outside_order(&self) -> bool {
+        (**self).is_outside_order()
+    }
+}
+
+#[cfg(feature = "std")]
+impl<'a, T: OrdSubset + ?Sized + ToOwned> OrdSubset for ::std::borrow::Cow<'a, T> {
+    #[inline(always)]
+    fn is_outside_order(&self) -> bool {
+        (**self).is_outside_order()
+    }
+}
+
+#[cfg(feature = "std")]
+impl<T: OrdSubset> OrdSubset for ::std::collections::BTreeSet<T> {
+    #[inline(always)]
+    fn is_outside_order(&self) -> bool {
+        self.iter().any(OrdSubset::is_outside_order)
+    }
+}
+
+#[cfg(feature = "std")]
+impl<K: OrdSubset, V: OrdSubset> OrdSubset for ::std::collections::BTreeMap<K, V> {
+    #[inline(always)]
+    fn is_outside_order(&self) -> bool {
+        self.iter().any(|(k, v)| k.is_outside_order() || v.is_outside_order())
+    }
+}
+
+#[cfg(feature = "std")]
+impl<T: OrdSubset> OrdSubset for ::std::collections::VecDeque<T> {
+    #[inline(always)]
+    fn is_outside_order(&self) -> bool {
+        self.iter().any(OrdSubset::is_outside_order)
+    }
+}
+
+#[cfg(feature = "std")]
+impl<T: OrdSubset> OrdSubset for ::std::collections::LinkedList<T> {
+    #[inline(always)]
+    fn is_outside_order(&self) -> bool {
+        self.iter().any(OrdSubset::is_outside_order)
+    }
+}
 
 macro_rules! array_impls {
     ($($N:expr),+) => {

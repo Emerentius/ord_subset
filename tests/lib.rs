@@ -254,13 +254,13 @@ fn binary_search_by_key_err() {
 // all implement the OrdSubsetSliceExt trait, no matter the mutability.
 #[allow(unused)]
 fn ord_subset_slice_ext_impl_test() {
-	fn foo<T: OrdSubsetSliceExt<U> + AsRef<[U]>, U: OrdSubset + Clone>(as_slice: T) {
+	fn foo<T: AsRef<[U]>, U: OrdSubset + Clone>(as_slice: T) {
 		// would panic, good thing it doesn't run
 		let element: &U = as_slice.as_ref().first().unwrap();
-		as_slice.ord_subset_binary_search(element);
-		as_slice.ord_subset_binary_search_rev(element);
-		as_slice.ord_subset_binary_search_by_key(element, |_| element.clone());
-		as_slice.ord_subset_binary_search_by(|_| std::cmp::Ordering::Equal);
+		as_slice.as_ref().ord_subset_binary_search(element);
+		as_slice.as_ref().ord_subset_binary_search_rev(element);
+		as_slice.as_ref().ord_subset_binary_search_by_key(element, |_| element.clone());
+		as_slice.as_ref().ord_subset_binary_search_by(|_| std::cmp::Ordering::Equal);
 	}
 
 	let mut vec: Vec<OrdSub> = vec![];
@@ -275,13 +275,13 @@ fn ord_subset_slice_ext_impl_test() {
 	foo(&mut arr);
 
 	// &slice
-	foo(&arr[..]);
-	foo(&mut arr[..]);
+	foo(&arr);
+	foo(&mut arr);
 
 	// &&slice
-	foo(&&arr[..]);
-	foo(&mut &mut arr[..]);
-	foo(& &mut arr[..]);
+	foo(&&arr);
+	foo(&mut &mut arr);
+	foo(& &mut arr);
 
 	// owned
 	foo(vec);
@@ -292,9 +292,10 @@ fn ord_subset_slice_ext_impl_test() {
 #[allow(unused)]
 fn ord_subset_mut_slice_ext_impl_test() {
 	fn sortable<T, U>(mut as_slice: T)
-		where T: OrdSubsetSliceExt<U> + AsMut<[U]>,
+		where T: AsMut<[U]>,
 		      U: OrdSubset,
 	{
+		let as_slice = as_slice.as_mut();
 		#[cfg(feature="std")]
 		as_slice.ord_subset_sort();
 		#[cfg(feature="std")]
@@ -336,9 +337,9 @@ fn non_ord_subset_slice_ext_impl_test() {
 		as_slice.ord_subset_binary_search_by(|_| std::cmp::Ordering::Equal);
 	}
 	*/
-	fn foo<T: OrdSubsetSliceExt<U> + AsRef<[U]>, U>(as_slice: T) {
+	fn foo<T: AsRef<[U]>, U>(as_slice: T) {
 		let key = OrdSub();
-		as_slice.ord_subset_binary_search_by_key(&key, |_| key);
+		as_slice.as_ref().ord_subset_binary_search_by_key(&key, |_| key);
 	}
 
 	let mut vec: Vec<NotOrdSub> = vec![];
@@ -369,15 +370,16 @@ fn non_ord_subset_slice_ext_impl_test() {
 // check that mutable vecs, arrays and slices of non-OrdSubset types are all sortable by key
 #[allow(unused)]
 fn non_ord_subset_mut_slice_ext_impl_test() {
+	use OrdSubsetSliceExt;
 	fn sortable<T, U>(mut as_slice: T)
-		where T: OrdSubsetSliceExt<U> + AsMut<[U]>,
+		where T: AsMut<[U]>,
 	{
 		let key = OrdSub();
 
 		#[cfg(feature="std")]
-		as_slice.ord_subset_sort_by_key(|_| key);
+		as_slice.as_mut().ord_subset_sort_by_key(|_| key);
 
-		as_slice.ord_subset_sort_unstable_by_key(|_| key);
+		as_slice.as_mut().ord_subset_sort_unstable_by_key(|_| key);
 	}
 
 	let mut vec: Vec<NotOrdSub> = vec![];
@@ -385,6 +387,10 @@ fn non_ord_subset_mut_slice_ext_impl_test() {
 
 	sortable(&mut vec);
 	sortable(&mut arr);
+
+	let key = OrdSub();
+	vec.ord_subset_sort_by_key(|_| key);
+
 	sortable(&mut arr[..]);
 	sortable(&mut &mut arr[..]);
 	// owned

@@ -3,6 +3,7 @@ extern crate ord_subset;
 extern crate core;
 use ord_subset::OrdSubsetIterExt;
 use ord_subset::OrdSubsetSliceExt;
+use ord_subset::OrdSubsetSliceExtMut;
 use ord_subset::OrdSubset;
 use ord_subset::OrdVar;
 

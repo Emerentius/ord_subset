@@ -20,7 +20,7 @@
 //!
 //!
 //! ```
-//! use ord_subset::{OrdSubsetIterExt, OrdSubsetSliceExt};
+//! use ord_subset::{OrdSubsetIterExt, OrdSubsetSliceExt, OrdSubsetSliceExtMut};
 //!
 //! // Slices. Works on vector, too.
 //! let mut s = [5.0, std::f64::NAN, 3.0, 2.0];

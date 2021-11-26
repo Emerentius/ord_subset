@@ -4,11 +4,15 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use ord_subset_trait::*;
 use core::cmp::Ordering::{self, Equal, Greater, Less};
+use ord_subset_trait::*;
 
-static ERROR_BINARY_SEARCH_OUTSIDE_ORDER: &str =
-    "Attempted binary search for value outside total order";
+macro_rules! panic_binary_search_outside_order {
+    () => {
+        panic!("Attempted binary search for value outside total order")
+    };
+}
+
 static ERROR_BINARY_SEARCH_EXPECT: &str = "Unexpected None for a.partial_cmp(b), a,b inside order. Violated OrdSubset contract or attempted binary search on unsorted data";
 
 // Wrapper for comparison functions
@@ -297,7 +301,7 @@ where
         T: OrdSubset,
     {
         if x.is_outside_order() {
-            panic!(ERROR_BINARY_SEARCH_OUTSIDE_ORDER)
+            panic_binary_search_outside_order!()
         };
         self.ord_subset_binary_search_by(|other| {
             other.partial_cmp(x).expect(ERROR_BINARY_SEARCH_EXPECT)
@@ -325,7 +329,7 @@ where
         F: FnMut(&T) -> B,
     {
         if b.is_outside_order() {
-            panic!(ERROR_BINARY_SEARCH_OUTSIDE_ORDER)
+            panic_binary_search_outside_order!()
         };
         // compare ordered values as expected
         // wrap it in a function that deals with unordered, so this one never sees them
@@ -340,7 +344,7 @@ where
         T: OrdSubset,
     {
         if x.is_outside_order() {
-            panic!(ERROR_BINARY_SEARCH_OUTSIDE_ORDER)
+            panic_binary_search_outside_order!()
         };
         self.ord_subset_binary_search_by(|other| {
             x.partial_cmp(other).expect(ERROR_BINARY_SEARCH_EXPECT)

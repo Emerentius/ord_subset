@@ -34,6 +34,32 @@ where
     }
 }
 
+struct CmpUnorderedGreaterAll<T: OrdSubset>(T);
+
+impl<T: OrdSubset> PartialEq for CmpUnorderedGreaterAll<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.0.is_outside_order() && other.0.is_outside_order() || self.0 == other.0
+    }
+}
+
+impl<T: OrdSubset> PartialOrd for CmpUnorderedGreaterAll<T> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(cmp_unordered_greater_all(
+            &self.0,
+            &other.0,
+            CmpUnwrap::cmp_unwrap,
+        ))
+    }
+}
+
+impl<T: OrdSubset> Eq for CmpUnorderedGreaterAll<T> {}
+
+impl<T: OrdSubset> Ord for CmpUnorderedGreaterAll<T> {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.partial_cmp(other).unwrap()
+    }
+}
+
 pub trait OrdSubsetSliceExt<T> {
     /// Sort the slice. Values outside the ordered subset are put at the end in their original order.
     ///
@@ -202,6 +228,12 @@ pub trait OrdSubsetSliceExt<T> {
     fn ord_subset_binary_search_rev(&self, x: &T) -> Result<usize, usize>
     where
         T: OrdSubset;
+
+    fn ord_subset_sort_by_cached_key<K, F>(&mut self, f: F)
+    where
+        Self: AsMut<[T]>,
+        F: FnMut(&T) -> K,
+        K: OrdSubset;
 }
 
 impl<T, U> OrdSubsetSliceExt<T> for U
@@ -350,4 +382,24 @@ where
             x.partial_cmp(other).expect(ERROR_BINARY_SEARCH_EXPECT)
         })
     }
+
+    fn ord_subset_sort_by_cached_key<K, F>(&mut self, mut f: F)
+    where
+        U: AsMut<[T]>,
+        F: FnMut(&T) -> K,
+        K: OrdSubset,
+    {
+        let new_key_f = dummy(|val| CmpUnorderedGreaterAll(f(val)));
+        self.as_mut().sort_by_cached_key(new_key_f);
+    }
+}
+
+// A function that just returns its argument, but serves as a type hint.
+// Otherwise we get an error about the closure input lifetime not being general enough.
+// Taken from user github.com/comex: https://github.com/rust-lang/rust/issues/70263#issuecomment-623169045
+fn dummy<F, T, K>(f: F) -> F
+where
+    F: for<'a> FnMut(&'a T) -> K,
+{
+    f
 }

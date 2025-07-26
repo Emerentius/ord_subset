@@ -4,8 +4,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use ord_subset_trait::*;
-use ord_var::*;
+use crate::{ord_subset_trait::*, ord_var::*};
 
 /////////////////////////////////////////////////////////////////////
 pub trait OrdSubsetIterExt: Iterator //where Self::Item: OrdSubset
@@ -72,9 +71,9 @@ pub trait OrdSubsetIterExt: Iterator //where Self::Item: OrdSubset
     /// use ord_subset::OrdSubsetIterExt;
     ///
     /// fn main() {
-    /// 	let vec = vec![2.0, 3.0, 5.0, std::f64::NAN];
-    /// 	let min_by = vec.iter().ord_subset_min_by_key(|num| num.recip()).unwrap();
-    /// 	assert_eq!(&5.0, min_by);
+    ///     let vec = vec![2.0, 3.0, 5.0, std::f64::NAN];
+    ///     let min_by = vec.iter().ord_subset_min_by_key(|num| num.recip()).unwrap();
+    ///     assert_eq!(&5.0, min_by);
     /// }
     /// ```
     #[inline]

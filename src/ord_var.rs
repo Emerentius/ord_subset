@@ -4,10 +4,8 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use core::cmp::Ordering;
-use core::fmt::Debug;
-use ord_subset_trait::*;
-use core::ops::Deref;
+use crate::ord_subset_trait::*;
+use core::{cmp::Ordering, fmt::Debug, ops::Deref};
 
 /// Wrapper to signal that the contained variables have a total order. It's illegal to compare two `OrdVar`s that are not ordered.
 /// For this reason, it's unsafe to create `OrdVar`s without checking. Checked constructors are available for `OrdSubset` types.
@@ -30,10 +28,7 @@ impl<T: PartialOrd + PartialEq> OrdVar<T> {
         T: Debug + OrdSubset,
     {
         if data.is_outside_order() {
-            panic!(
-                "Attempted saving data outside of total order into OrdVar: {:?}",
-                data
-            )
+            panic!("{}", "Attempted saving data outside of total order into OrdVar: {data:?}")
         };
         OrdVar(data)
     }
@@ -99,12 +94,12 @@ impl<T: Default + OrdSubset + Debug> Default for OrdVar<T> {
 #[cfg(feature = "ops")]
 mod ops {
     // would love to be able to macro these away somehow
-    #[cfg_attr(rustfmt, rustfmt_skip)]
+    #[rustfmt::skip]
 	use core::ops::{Add, Sub, Mul, Div, Rem, BitAnd, BitOr, BitXor, Shl, Shr, Neg, Not,
                 AddAssign, SubAssign, MulAssign, DivAssign, RemAssign, BitAndAssign, BitOrAssign, BitXorAssign, ShlAssign, ShrAssign,};
-    use core::fmt::Debug;
-    use ord_subset_trait::*;
     use super::OrdVar;
+    use crate::ord_subset_trait::*;
+    use core::fmt::Debug;
 
     #[inline(always)]
     fn construct<T: OrdSubset + Debug>(t: T) -> OrdVar<T> {

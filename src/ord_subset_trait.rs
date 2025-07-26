@@ -13,7 +13,7 @@ pub trait OrdSubset: PartialOrd<Self> + PartialEq<Self> {
     fn is_outside_order(&self) -> bool;
 }
 
-impl<'a, A> OrdSubset for &'a A
+impl<A> OrdSubset for &A
 where
     A: OrdSubset,
 {
@@ -23,7 +23,7 @@ where
     }
 }
 
-impl<'a, A> OrdSubset for &'a mut A
+impl<A> OrdSubset for &mut A
 where
     A: OrdSubset,
 {
@@ -33,7 +33,7 @@ where
     }
 }
 
-#[cfg_attr(feature = "cargo-clippy", allow(float_cmp, eq_op))]
+#[allow(clippy::float_cmp, clippy::eq_op)]
 impl OrdSubset for f64 {
     #[inline(always)]
     fn is_outside_order(&self) -> bool {
@@ -42,7 +42,7 @@ impl OrdSubset for f64 {
     }
 }
 
-#[cfg_attr(feature = "cargo-clippy", allow(float_cmp, eq_op))]
+#[allow(clippy::float_cmp, clippy::eq_op)]
 impl OrdSubset for f32 {
     #[inline(always)]
     fn is_outside_order(&self) -> bool {
@@ -71,7 +71,7 @@ macro_rules! impl_for_ord {
 	)
 }
 
-#[cfg_attr(rustfmt, rustfmt_skip)]
+#[rustfmt::skip]
 impl_for_ord!((), u8, u16, u32, u64, usize, i8, i16, i32, i64, isize, bool, char);
 
 macro_rules! array_impls {
@@ -87,7 +87,7 @@ macro_rules! array_impls {
     }
 }
 
-#[cfg_attr(rustfmt, rustfmt_skip)]
+#[rustfmt::skip]
 array_impls!(
 	0, 1, 2, 3, 4, 5, 6, 7, 8,
 	9, 10, 11, 12, 13, 14, 15, 16,
@@ -110,7 +110,7 @@ macro_rules! tuple_impls {
         }
     )+) => {
         $(
-            impl<$($T:OrdSubset),+> OrdSubset for ($($T,)+) where last_type!($($T,)+): ?Sized {
+            impl<$($T:OrdSubset),+> OrdSubset for ($($T,)+) {
                 #[inline]
                 fn is_outside_order(&self) -> bool {
                     $(self.$idx.is_outside_order())||+
@@ -249,13 +249,13 @@ mod test {
     use super::OrdSubset;
     #[test]
     fn heterogenous_tuple() {
-        #[cfg_attr(rustfmt, rustfmt_skip)]
+        #[rustfmt::skip]
         let tup = ((), 0u8, 0u16, 0u32, 0u64, 0usize, 0i8, 0i16, 0i32, 0i64, 0isize, 'a');
         assert!(!tup.is_outside_order());
     }
 
     #[test]
-    #[cfg_attr(rustfmt, rustfmt_skip)]
+    #[rustfmt::skip]
     fn slice() {
         let a = [0u8; 32];
         assert!( ! a.is_outside_order() );

@@ -10,6 +10,11 @@ on:
         description: open SSH session for interactive debug on failure
         type: boolean
         default: false
+  schedule:
+    # Run tests once a month to catch regressions with beta & nightly.
+    # Would actually like to run in response to Rust releases or at least on their schedule (every 6 weeks),
+    # but neither is (easily) possible.
+    - cron: 38 3 4 * *
 
 env:
   CARGO_TERM_COLOR: always

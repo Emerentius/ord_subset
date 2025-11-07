@@ -1,3 +1,7 @@
+Version 3.1.2 (2025-11-07)
+--------------------------
+* Removed ?Sized bound for tuples as support for unsized tuples has been removed from the language ([Removal PR for rust](https://github.com/rust-lang/rust/pull/138340)). 
+
 Version 3.1.1 (2018-09-10)
 --------------------------
 * Code tarball doesn't unnecessarily contain files with executable bit set anymore.

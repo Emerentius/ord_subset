@@ -4,11 +4,15 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use ord_subset_trait::*;
 use core::cmp::Ordering::{self, Equal, Greater, Less};
+use ord_subset_trait::*;
 
-static ERROR_BINARY_SEARCH_OUTSIDE_ORDER: &str =
-    "Attempted binary search for value outside total order";
+macro_rules! panic_binary_search_outside_order {
+    () => {
+        panic!("Attempted binary search for value outside total order")
+    };
+}
+
 static ERROR_BINARY_SEARCH_EXPECT: &str = "Unexpected None for a.partial_cmp(b), a,b inside order. Violated OrdSubset contract or attempted binary search on unsorted data";
 
 // Wrapper for comparison functions
@@ -27,6 +31,32 @@ where
         (true, false) => Greater,
         (false, true) => Less,
         (false, false) => compare(a, b), // the normal case, both valid. Here user function applies.
+    }
+}
+
+struct CmpUnorderedGreaterAll<T: OrdSubset>(T);
+
+impl<T: OrdSubset> PartialEq for CmpUnorderedGreaterAll<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.0.is_outside_order() && other.0.is_outside_order() || self.0 == other.0
+    }
+}
+
+impl<T: OrdSubset> PartialOrd for CmpUnorderedGreaterAll<T> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(cmp_unordered_greater_all(
+            &self.0,
+            &other.0,
+            CmpUnwrap::cmp_unwrap,
+        ))
+    }
+}
+
+impl<T: OrdSubset> Eq for CmpUnorderedGreaterAll<T> {}
+
+impl<T: OrdSubset> Ord for CmpUnorderedGreaterAll<T> {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.partial_cmp(other).unwrap()
     }
 }
 
@@ -198,6 +228,12 @@ pub trait OrdSubsetSliceExt<T> {
     fn ord_subset_binary_search_rev(&self, x: &T) -> Result<usize, usize>
     where
         T: OrdSubset;
+
+    fn ord_subset_sort_by_cached_key<K, F>(&mut self, f: F)
+    where
+        Self: AsMut<[T]>,
+        F: FnMut(&T) -> K,
+        K: OrdSubset;
 }
 
 impl<T, U> OrdSubsetSliceExt<T> for U
@@ -297,7 +333,7 @@ where
         T: OrdSubset,
     {
         if x.is_outside_order() {
-            panic!(ERROR_BINARY_SEARCH_OUTSIDE_ORDER)
+            panic_binary_search_outside_order!()
         };
         self.ord_subset_binary_search_by(|other| {
             other.partial_cmp(x).expect(ERROR_BINARY_SEARCH_EXPECT)
@@ -325,7 +361,7 @@ where
         F: FnMut(&T) -> B,
     {
         if b.is_outside_order() {
-            panic!(ERROR_BINARY_SEARCH_OUTSIDE_ORDER)
+            panic_binary_search_outside_order!()
         };
         // compare ordered values as expected
         // wrap it in a function that deals with unordered, so this one never sees them
@@ -340,10 +376,30 @@ where
         T: OrdSubset,
     {
         if x.is_outside_order() {
-            panic!(ERROR_BINARY_SEARCH_OUTSIDE_ORDER)
+            panic_binary_search_outside_order!()
         };
         self.ord_subset_binary_search_by(|other| {
             x.partial_cmp(other).expect(ERROR_BINARY_SEARCH_EXPECT)
         })
     }
+
+    fn ord_subset_sort_by_cached_key<K, F>(&mut self, mut f: F)
+    where
+        U: AsMut<[T]>,
+        F: FnMut(&T) -> K,
+        K: OrdSubset,
+    {
+        let new_key_f = dummy(|val| CmpUnorderedGreaterAll(f(val)));
+        self.as_mut().sort_by_cached_key(new_key_f);
+    }
+}
+
+// A function that just returns its argument, but serves as a type hint.
+// Otherwise we get an error about the closure input lifetime not being general enough.
+// Taken from user github.com/comex: https://github.com/rust-lang/rust/issues/70263#issuecomment-623169045
+fn dummy<F, T, K>(f: F) -> F
+where
+    F: for<'a> FnMut(&'a T) -> K,
+{
+    f
 }

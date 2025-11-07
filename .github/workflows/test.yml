@@ -5,6 +5,11 @@ on:
         branches: [master]
     pull_request:
     workflow_dispatch:
+        inputs:
+            interactive_debug:
+                description: open SSH session for interactive debug on failure
+                type: boolean
+                default: false
 
 env:
     CARGO_TERM_COLOR: always
@@ -41,4 +46,4 @@ jobs:
 
             - name: Interactive debug
               uses: mxschmitt/action-tmate@v3
-              if: failure() && github.event_name == 'workflow_dispatch'
+              if: failure() && github.event_name == 'workflow_dispatch' && inputs.interactive_debug

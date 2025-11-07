@@ -229,7 +229,7 @@ fn binary_search_by_key_err() {
 	for num in array.iter().take(N_NO_NAN) {
 		let key_diff = key_function(&(num+0.01))*1.01 + 0.01;
 		let pos = array.ord_subset_binary_search_by_key(&key_diff, key_function);
-		let pos_std = (&array[..N_NO_NAN]).binary_search_by_key(
+		let pos_std = array[..N_NO_NAN].binary_search_by_key(
 			&OrdVar::new(key_diff),
 			|num| OrdVar::new(key_function(num))
 		);

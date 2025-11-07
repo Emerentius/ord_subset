@@ -156,7 +156,7 @@ pub trait OrdSubsetSliceExt<T> {
     /// assert_eq!(s.ord_subset_binary_search(&100.), Err(13));
     /// let r = s.ord_subset_binary_search(&1.);
     /// assert!(match r { Ok(1...4) => true, _ => false, });
-    ///	assert_eq!(s.ord_subset_binary_search(&f64::INFINITY), Err(13));
+    /// assert_eq!(s.ord_subset_binary_search(&f64::INFINITY), Err(13));
     /// ```
     ///
     /// # Panics
@@ -297,7 +297,7 @@ where
         T: OrdSubset,
     {
         if x.is_outside_order() {
-            panic!(ERROR_BINARY_SEARCH_OUTSIDE_ORDER)
+            panic!("{}", ERROR_BINARY_SEARCH_OUTSIDE_ORDER)
         };
         self.ord_subset_binary_search_by(|other| {
             other.partial_cmp(x).expect(ERROR_BINARY_SEARCH_EXPECT)
@@ -325,7 +325,7 @@ where
         F: FnMut(&T) -> B,
     {
         if b.is_outside_order() {
-            panic!(ERROR_BINARY_SEARCH_OUTSIDE_ORDER)
+            panic!("{}", ERROR_BINARY_SEARCH_OUTSIDE_ORDER)
         };
         // compare ordered values as expected
         // wrap it in a function that deals with unordered, so this one never sees them
@@ -340,7 +340,7 @@ where
         T: OrdSubset,
     {
         if x.is_outside_order() {
-            panic!(ERROR_BINARY_SEARCH_OUTSIDE_ORDER)
+            panic!("{}", ERROR_BINARY_SEARCH_OUTSIDE_ORDER)
         };
         self.ord_subset_binary_search_by(|other| {
             x.partial_cmp(other).expect(ERROR_BINARY_SEARCH_EXPECT)

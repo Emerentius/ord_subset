@@ -113,7 +113,7 @@ macro_rules! tuple_impls {
         }
     )+) => {
         $(
-            impl<$($T:OrdSubset),+> OrdSubset for ($($T,)+) where last_type!($($T,)+): ?Sized {
+            impl<$($T:OrdSubset),+> OrdSubset for ($($T,)+) {
                 #[inline]
                 fn is_outside_order(&self) -> bool {
                     $(self.$idx.is_outside_order())||+
@@ -121,11 +121,6 @@ macro_rules! tuple_impls {
             }
         )+
     }
-}
-
-macro_rules! last_type {
-    ($a:ident,) => { $a };
-    ($a:ident, $($rest_a:ident,)+) => { last_type!($($rest_a,)+) };
 }
 
 tuple_impls! {

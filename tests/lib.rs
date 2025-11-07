@@ -1,4 +1,4 @@
-#![cfg_attr(feature = "cargo-clippy", allow(float_cmp, match_wild_err_arm))]
+#![cfg_attr(clippy, allow(clippy::float_cmp, clippy::match_wild_err_arm, clippy::legacy_numeric_constants))]
 extern crate ord_subset;
 extern crate core;
 use ord_subset::OrdSubsetIterExt;
@@ -253,6 +253,7 @@ fn binary_search_by_key_err() {
 // check that slices, arrays and vecs as well as references
 // all implement the OrdSubsetSliceExt trait, no matter the mutability.
 #[allow(unused)]
+#[cfg_attr(clippy, allow(clippy::needless_borrows_for_generic_args))]
 fn ord_subset_slice_ext_impl_test() {
 	fn foo<T: OrdSubsetSliceExt<U> + AsRef<[U]>, U: OrdSubset + Clone>(as_slice: T) {
 		// would panic, good thing it doesn't run
@@ -325,6 +326,7 @@ fn ord_subset_mut_slice_ext_impl_test() {
 // check that slices, arrays and vecs as well as references of non-OrdSubset items
 // all implement the OrdSubsetSliceExt trait and allow binary_search_by_key.
 #[allow(unused)]
+#[cfg_attr(clippy, allow(clippy::needless_borrows_for_generic_args))]
 fn non_ord_subset_slice_ext_impl_test() {
 	/*
 	fn foo<T: OrdSubsetSliceExt<U> + AsRef<[U]>, U: Clone>(as_slice: T) {

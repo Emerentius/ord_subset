@@ -13,6 +13,7 @@ pub trait OrdSubset: PartialOrd<Self> + PartialEq<Self> {
     fn is_outside_order(&self) -> bool;
 }
 
+#[cfg_attr(clippy, allow(clippy::needless_lifetimes))] // lifetime required in old version
 impl<'a, A> OrdSubset for &'a A
 where
     A: OrdSubset,
@@ -23,6 +24,7 @@ where
     }
 }
 
+#[cfg_attr(clippy, allow(clippy::needless_lifetimes))] // lifetime required in old version
 impl<'a, A> OrdSubset for &'a mut A
 where
     A: OrdSubset,
@@ -33,7 +35,7 @@ where
     }
 }
 
-#[cfg_attr(feature = "cargo-clippy", allow(float_cmp, eq_op))]
+#[cfg_attr(clippy, allow(clippy::float_cmp, clippy::eq_op))]
 impl OrdSubset for f64 {
     #[inline(always)]
     fn is_outside_order(&self) -> bool {
@@ -42,7 +44,7 @@ impl OrdSubset for f64 {
     }
 }
 
-#[cfg_attr(feature = "cargo-clippy", allow(float_cmp, eq_op))]
+#[cfg_attr(clippy, allow(clippy::float_cmp, clippy::eq_op))]
 impl OrdSubset for f32 {
     #[inline(always)]
     fn is_outside_order(&self) -> bool {
@@ -51,6 +53,7 @@ impl OrdSubset for f32 {
     }
 }
 
+#[allow(unused)] // only needed for implementation
 trait EnsureOrd: Ord {}
 
 macro_rules! impl_for_ord {

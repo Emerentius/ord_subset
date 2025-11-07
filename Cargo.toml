@@ -2,6 +2,7 @@
 name = "ord_subset"
 version = "3.1.1"
 authors = ["Emerentius"]
+# rust-version = "1.21.0" # attr introduced in 1.56, ignored before
 
 license = "MIT/Apache-2.0"
 repository = "https://github.com/emerentius/ord_subset"
@@ -10,6 +11,12 @@ documentation = "https://docs.rs/ord_subset/"
 description = "Tools for working with the Ord subset of certain PartialOrd types, like floats."
 
 keywords = ["iterator", "slice", "Ord", "PartialOrd", "float"]
+
+[lints.clippy]
+unnecessary_clippy_cfg = "allow"
+inline_always = "allow"
+match_bool = "allow"
+deprecated_cfg_attr = "allow"
 
 [features]
 default = ["std"]

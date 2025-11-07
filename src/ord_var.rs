@@ -65,6 +65,7 @@ impl<T: PartialOrd + PartialEq> OrdVar<T> {
 
 impl<T: PartialOrd + PartialEq> Eq for OrdVar<T> {}
 
+#[cfg_attr(clippy, allow(clippy::derive_ord_xor_partial_ord))]
 impl<T: PartialOrd + PartialEq> Ord for OrdVar<T> {
     #[inline]
     fn cmp(&self, other: &Self) -> Ordering {

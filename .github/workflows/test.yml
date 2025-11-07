@@ -1,49 +1,49 @@
 name: Tests
 
 on:
-    push:
-        branches: [master]
-    pull_request:
-    workflow_dispatch:
-        inputs:
-            interactive_debug:
-                description: open SSH session for interactive debug on failure
-                type: boolean
-                default: false
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      interactive_debug:
+        description: open SSH session for interactive debug on failure
+        type: boolean
+        default: false
 
 env:
-    CARGO_TERM_COLOR: always
+  CARGO_TERM_COLOR: always
 
 jobs:
-    build:
-        runs-on: ${{ matrix.os }}
-        strategy:
-            fail-fast: false
-            matrix:
-                include:
-                    - build: pinned # don't rename
-                      os: ubuntu-latest
-                      rust: 1.21.0
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - build: pinned # don't rename
+            os: ubuntu-latest
+            rust: 1.21.0
 
-                    - build: beta
-                      os: ubuntu-latest
-                      rust: beta
+          - build: beta
+            os: ubuntu-latest
+            rust: beta
 
-                    - build: nightly
-                      os: ubuntu-latest
-                      rust: nightly
+          - build: nightly
+            os: ubuntu-latest
+            rust: nightly
 
-        steps:
-            - name: Install Rust
-              uses: dtolnay/rust-toolchain@master
-              with:
-                  toolchain: ${{ matrix.rust }}
+    steps:
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.rust }}
 
-            - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-            - name: run tests
-              run: cargo test --verbose --features ops
+      - name: run tests
+        run: cargo test --verbose --features ops
 
-            - name: Interactive debug
-              uses: mxschmitt/action-tmate@v3
-              if: failure() && github.event_name == 'workflow_dispatch' && inputs.interactive_debug
+      - name: Interactive debug
+        uses: mxschmitt/action-tmate@v3
+        if: failure() && github.event_name == 'workflow_dispatch' && inputs.interactive_debug

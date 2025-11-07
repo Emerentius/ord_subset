@@ -44,11 +44,11 @@
 extern crate core;
 
 mod iter_ext;
+mod ord_subset_trait;
 mod ord_var;
 mod slice_ext;
-mod ord_subset_trait;
 
 pub use iter_ext::*;
+pub use ord_subset_trait::*;
 pub use ord_var::*;
 pub use slice_ext::*;
-pub use ord_subset_trait::*;

@@ -4,8 +4,8 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use ord_subset_trait::*;
 use core::cmp::Ordering::{self, Equal, Greater, Less};
+use ord_subset_trait::*;
 
 static ERROR_BINARY_SEARCH_OUTSIDE_ORDER: &str =
     "Attempted binary search for value outside total order";

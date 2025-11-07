@@ -6,8 +6,8 @@
 
 use core::cmp::Ordering;
 use core::fmt::Debug;
-use ord_subset_trait::*;
 use core::ops::Deref;
+use ord_subset_trait::*;
 
 /// Wrapper to signal that the contained variables have a total order. It's illegal to compare two `OrdVar`s that are not ordered.
 /// For this reason, it's unsafe to create `OrdVar`s without checking. Checked constructors are available for `OrdSubset` types.
@@ -103,9 +103,9 @@ mod ops {
     #[cfg_attr(rustfmt, rustfmt_skip)]
 	use core::ops::{Add, Sub, Mul, Div, Rem, BitAnd, BitOr, BitXor, Shl, Shr, Neg, Not,
                 AddAssign, SubAssign, MulAssign, DivAssign, RemAssign, BitAndAssign, BitOrAssign, BitXorAssign, ShlAssign, ShrAssign,};
+    use super::OrdVar;
     use core::fmt::Debug;
     use ord_subset_trait::*;
-    use super::OrdVar;
 
     #[inline(always)]
     fn construct<T: OrdSubset + Debug>(t: T) -> OrdVar<T> {

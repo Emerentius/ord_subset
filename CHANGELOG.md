@@ -1,23 +1,14 @@
-Version 1.1.0 (2016-01-25)
+Version 3.1.1 (2018-09-10)
 --------------------------
+* Code tarball doesn't unnecessarily contain files with executable bit set anymore.
 
-* Implement `Hash` for `OrdVar(T)`, if `T: Hash`
-
-Version 1.2.0 (2016-03-08)
+Version 3.1.0 (2017-11-26)
 --------------------------
-
-* Add two new default methods `ord_subset_min_by_key` and `ord_subset_max_by_key` for `OrdSubsetIterExt` to mimic std library.
-
-Version 2.0.0 (2017-02-28)
-==========================
-* Allow `*_by_key()`  functions for iterators and slices when the items aren't `OrdSubset`. Only the keys need to be. This changes the extension traits' bounds, therefore technically a [breaking change] (cause for major version bump)
-* Add long overdue `ord_subset_sort_by_key()` and `ord_subset_binary_search_by_key()` for slices
-
-Version 2.1.0 (2017-09-23)
---------------------------
-* `OrdVar::new_unchecked()` is no longer marked unsafe. Incorrectly constructed `OrdVar`s can cause crashes and surprising behaviour
-but no memory unsafety
-* In slice sorting, uphold sort stability for values outside total order.
+* Add `OrdSubset` impls for all `Ord` intrinsics, including arrays and tuples up to an arity of 32 and 12 respectively as well as slices.
+* Add `OrdSubset` impls for `f32`, `f64` in `no_std` mode without requiring `unstable`.
+* Add new feature `ops` for overloading operators for `OrdVar<T>` for anything
+  that `T` is overloaded for. Checks whether result can be ordered. This can be deactivated with
+  `unchecked ops`.
 
 Version 3.0.0 (2017-10-21)
 ==========================
@@ -28,15 +19,23 @@ Version 3.0.0 (2017-10-21)
   OrdSubset implementations for f32, f64 with `no_std` require the `unstable` feature of this crate (impls readded in 3.1 without `unstable`).
 * Stabilized `_rev()` variants
 
-Version 3.1.0 (2017-11-26)
+Version 2.1.0 (2017-09-23)
 --------------------------
-* Add `OrdSubset` impls for all `Ord` intrinsics, including arrays and tuples up to an arity of 32 and 12 respectively as well as slices.
-* Add `OrdSubset` impls for `f32`, `f64` in `no_std` mode without requiring `unstable`.
-* Add new feature `ops` for overloading operators for `OrdVar<T>` for anything
-  that `T` is overloaded for. Checks whether result can be ordered. This can be deactivated with
-  `unchecked ops`.
+* `OrdVar::new_unchecked()` is no longer marked unsafe. Incorrectly constructed `OrdVar`s can cause crashes and surprising behaviour
+but no memory unsafety
+* In slice sorting, uphold sort stability for values outside total order.
 
+Version 2.0.0 (2017-02-28)
+==========================
+* Allow `*_by_key()`  functions for iterators and slices when the items aren't `OrdSubset`. Only the keys need to be. This changes the extension traits' bounds, therefore technically a [breaking change] (cause for major version bump)
+* Add long overdue `ord_subset_sort_by_key()` and `ord_subset_binary_search_by_key()` for slices
 
-Version 3.1.1 (2018-09-10)
+Version 1.2.0 (2016-03-08)
 --------------------------
-* Code tarball doesn't unnecessarily contain files with executable bit set anymore.
+
+* Add two new default methods `ord_subset_min_by_key` and `ord_subset_max_by_key` for `OrdSubsetIterExt` to mimic std library.
+
+Version 1.1.0 (2016-01-25)
+--------------------------
+
+* Implement `Hash` for `OrdVar(T)`, if `T: Hash`

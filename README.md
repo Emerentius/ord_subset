@@ -2,8 +2,6 @@
 
 Crate for working with the `Ord` subset of certain types like `f32`, `f64`.
 
-
-
 Documentation is up at https://docs.rs/ord_subset/.
 
 # Usage

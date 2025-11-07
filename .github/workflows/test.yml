@@ -43,6 +43,8 @@ jobs:
 
       - name: run tests
         run: cargo test --verbose --features ops
+      - name: run tests (no_std)
+        run: cargo test --verbose --no-default-features --features ops
 
       - name: Interactive debug
         uses: mxschmitt/action-tmate@v3

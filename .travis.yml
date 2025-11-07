@@ -1,6 +1,0 @@
-language: rust
-script:
-  - cargo build --verbose --features="ops"
-  - cargo test --verbose --features="ops"
-  - cargo build --verbose --no-default-features --features="ops"
-  - cargo test --verbose --no-default-features --features="ops"
